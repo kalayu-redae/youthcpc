@@ -1,0 +1,6 @@
+
+- We will validate the rest password and update password not the same with the current passowrd
+- Branch Deleted Successfull message in swagger is not responded because 204 status code why?
+- Why patient imported files not working?
+- Users, Permissions, and Roles must be configure and assign based on finshing the project
+- 
