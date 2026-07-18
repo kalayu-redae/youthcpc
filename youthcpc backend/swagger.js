@@ -5,18 +5,18 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Smart Hospital Managment System API',
+      title: 'Youth CPC API Documentation',
       version: '1.0.0',
-    description: `API documentation for Smart Hospital Management System  📞 Phone: 0998890220`,    
-    contact: {
-      name: "Sophor Technologies",
-      email: "info@sophortechnologies.com",
-        }
+      description: `API documentation for Youth CPC platform  📞 Phone: 0943662611`,
+      contact: {
+        name: "youthcpc",
+        email: "info@youthcpc.com",
+      }
     },
 
     servers: [
       {
-        url: '/api/hms',
+        url: '/api/youthcpc',
         description: 'Live API Server (Relative Path)',
       },
     ],
@@ -44,9 +44,9 @@ const options = {
 module.exports = (app) => {
   app.use(
     '/api-docs',
-     swaggerUi.serve, (req, res) => {
-    const swaggerSpec = swaggerJSDoc(options); // regenerate on each request
-    swaggerUi.setup(swaggerSpec)(req, res);
-  });
+    swaggerUi.serve, (req, res) => {
+      const swaggerSpec = swaggerJSDoc(options); // regenerate on each request
+      swaggerUi.setup(swaggerSpec)(req, res);
+    });
 };
 

@@ -1,8 +1,8 @@
-const express=require("express")
+const express = require("express")
 const app = express();
-const router=express.Router()
+const router = express.Router()
 
-const authoController=require("./auth.controller")
+const authoController = require("./auth.controller")
 const { authenticationJwt, requirePermission } = require("../../utils/authUtils");
 
 router.use(function (req, res, next) {
@@ -14,22 +14,22 @@ router.use(function (req, res, next) {
 });
 
 
-router.post("/signup",authoController.uploaduserAttachements,authoController.signup)
-router.post("/login",authoController.login)
+router.post("/signup", authoController.uploaduserAttachements, authoController.signup)
+router.post("/login", authoController.login)
 
 router.post('/forgetPassword', authoController.forgetPassword);
 router.post('/verifyOTP', authoController.verifyOTP);
-router.patch('/resetPassword',authoController.resetPassword);
+router.patch('/resetPassword', authoController.resetPassword);
 
 // // Protect all routes after this middleware
 
 router.use(authenticationJwt);
 
-router.get('/getMe',authoController.getMe);
-router.patch('/updateMe',authoController.uploaduserAttachements,authoController.updateMe);
-router.patch('/updatemyPassword',authoController.updateMyPassword);
+router.get('/getMe', authoController.getMe);
+router.patch('/updateMe', authoController.uploaduserAttachements, authoController.updateMe);
+router.patch('/updatemyPassword', authoController.updateMyPassword);
 
-module.exports=router
+module.exports = router
 
 
 /**

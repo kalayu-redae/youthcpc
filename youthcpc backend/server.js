@@ -5,7 +5,7 @@ const app = require("./index");
 const envFile = process.env.NODE_ENV === "production" ? ".env.production" : ".env.development";
 require('dotenv').config({ path: envFile });
 
-const { connectDB} = require("./config/db");
+const { connectDB } = require("./config/db");
 //const { createDefaultAdminUser } = require("./utils/userUtils"); // Import the function
 
 connectDB();
@@ -22,12 +22,12 @@ const initializeServer = async () => {
     const PORT = process.env.PORT || 8085;
     const SSL = process.env.SSL
     if (SSL === "true") {
-       https.createServer(app).listen(() => {
+      https.createServer(app).listen(() => {
         console.log(`HTTPS Server is running on https://localhost:${PORT}`);
       });
 
     } else {
-      
+
       http.createServer(app).listen(PORT, "127.0.0.1", () => {
         console.log(`HTTP Server is running on http://localhost:${PORT}`);
         //console.log("Format Date Utility Loaded:", formatDate);

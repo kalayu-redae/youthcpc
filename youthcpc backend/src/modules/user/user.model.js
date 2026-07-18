@@ -23,8 +23,6 @@ module.exports = (sequelize, DataTypes) => {
 
   User.init({
     id: { type: DataTypes.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true },
-    businessId: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
-    branchId: { type: DataTypes.INTEGER.UNSIGNED, allowNull: true },
     roleId: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
     fullName: { type: DataTypes.STRING, allowNull: false },
     phoneNumber: { type: DataTypes.STRING, allowNull: false, unique: true },
@@ -42,16 +40,14 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'Users',
     timestamps: true,
     hooks: {
-      beforeCreate: async (user) => { if(user.password) user.password = await bcrypt.hash(user.password, 12); },
-      beforeUpdate: async (user) => { if(user.changed('password')) user.password = await bcrypt.hash(user.password, 12); }
+      beforeCreate: async (user) => { if (user.password) user.password = await bcrypt.hash(user.password, 12); },
+      beforeUpdate: async (user) => { if (user.changed('password')) user.password = await bcrypt.hash(user.password, 12); }
     }
   });
 
   User.associate = (models) => {
     User.belongsTo(models.Role, { foreignKey: 'roleId', as: 'role' });
-    User.belongsTo(models.Business, { foreignKey: 'businessId', as: 'business' });
-    User.belongsTo(models.Branch, { foreignKey: 'branchId', as: 'branch' });
-    User.belongsToMany(models.Permission, {through: models.UserPermission,foreignKey: 'userId', as: 'permissions'});
+
   };
 
   return User;

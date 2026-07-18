@@ -1,3 +1,3 @@
-## Smart Sophor Hospital Management System
+## youth cpc platform
 
 ## System Architecture Overview

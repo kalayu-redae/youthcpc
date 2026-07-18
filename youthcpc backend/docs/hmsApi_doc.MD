@@ -1,5 +1,5 @@
 
-# Hospital Management System (HMS) – API Documentation
+# youth cpc Management System (HMS) – API Documentation
 Patient → Registration → Triage → Doctor → Lab/Pharmacy → Billing → Discharge
 ## Base URLs
 - **Local:** `http://localhost:8085/api/hms`
