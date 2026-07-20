@@ -1,43 +1,81 @@
 'use strict';
+
 const bcrypt = require('bcryptjs');
 
 module.exports = {
   async up(queryInterface) {
     const now = new Date();
 
-    // Get SUPER_ADMIN role
-    const [roles] = await queryInterface.sequelize.query(
-      "SELECT id FROM Roles WHERE code='superAdmin' LIMIT 1;"
-    );
-    if (!roles || roles.length === 0) throw new Error('SUPER_ADMIN role not found. Seed roles first.');
-    const superAdminRoleId = roles[0].id;
-    const ownerRoleId = superAdminRoleId + 1; // Assuming ADMIN role follows SUPER_ADMIN
+    const [roles] = await queryInterface.sequelize.query(`
+      SELECT id,code
+      FROM Roles
+      WHERE code IN ('SUPER_ADMIN','ADMIN','COORDINATOR','MEMBER')
+    `);
 
-    const passwordHash = await bcrypt.hash('superAdmin@1234', 10);
-    const ownerPasswordHash = await bcrypt.hash('owner@1234', 10);
+    const getRole = code => roles.find(r => r.code === code)?.id;
 
     await queryInterface.bulkInsert('Users', [
       {
-        businessId: 1,
-        branchId:1,
-        roleId: superAdminRoleId,
-        fullName: 'System Admin',
-        email: 'kalayureda2016@gmail.com',
-        phoneNumber: '1234567890',
-        password: passwordHash,
+        roleId: getRole('SUPER_ADMIN'),
+        fullName: 'Super Administrator',
+        phoneNumber: '0911000000',
+        email: 'superadmin@youthcpc.org',
+        password: await bcrypt.hash('SuperAdmin@123', 12),
+        profileImage: null,
+        isVerified: true,
         isActive: true,
+        changePassword: false,
+        lastLogin: null,
+        passwordResetOTP: null,
+        passwordResetOTPExpires: null,
         createdAt: now,
         updatedAt: now
       },
       {
-        businessId: 1,
-        branchId:1,
-        roleId: ownerRoleId,
-        fullName: 'Owner',
-        email: 'kalayuredae2@gmail.com',
-        phoneNumber: '123456780',
-        password: ownerPasswordHash,
+        roleId: getRole('ADMIN'),
+        fullName: 'System Administrator',
+        phoneNumber: '0911000001',
+        email: 'admin@youthcpc.org',
+        password: await bcrypt.hash('Admin@123', 12),
+        profileImage: null,
+        isVerified: true,
         isActive: true,
+        changePassword: true,
+        lastLogin: null,
+        passwordResetOTP: null,
+        passwordResetOTPExpires: null,
+        createdAt: now,
+        updatedAt: now
+      },
+      {
+        roleId: getRole('COORDINATOR'),
+        fullName: 'Youth Coordinator',
+        phoneNumber: '0911000002',
+        email: 'coordinator@youthcpc.org',
+        password: await bcrypt.hash('Coordinator@123', 12),
+        profileImage: null,
+        isVerified: true,
+        isActive: true,
+        changePassword: true,
+        lastLogin: null,
+        passwordResetOTP: null,
+        passwordResetOTPExpires: null,
+        createdAt: now,
+        updatedAt: now
+      },
+      {
+        roleId: getRole('MEMBER'),
+        fullName: 'Youth Member',
+        phoneNumber: '0911000003',
+        email: 'member@youthcpc.org',
+        password: await bcrypt.hash('Member@123', 12),
+        profileImage: null,
+        isVerified: true,
+        isActive: true,
+        changePassword: true,
+        lastLogin: null,
+        passwordResetOTP: null,
+        passwordResetOTPExpires: null,
         createdAt: now,
         updatedAt: now
       }
@@ -45,6 +83,8 @@ module.exports = {
   },
 
   async down(queryInterface) {
-    await queryInterface.bulkDelete('Users', null, {});
+    await queryInterface.bulkDelete('Users', {
+      phoneNumber: ['0911000000', '0911000001', '0911000002']
+    });
   }
 };

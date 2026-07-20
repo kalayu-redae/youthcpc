@@ -1,224 +1,140 @@
-const express=require("express")
-const app = express();
-const router=express.Router()
+'use strict';
 
-const userController=require("./user.controller")
+const router = require('express').Router();
 
-const { authenticationJwt,requirePermission,requirePermissionOrSelf} = require('../../utils/authUtils');
+const userController = require('./user.controller');
 
-router.use(function (req, res, next) {
-  res.header(
-    'Access-Control-Allow-Headers',
-    'x-access-token, Origin, Content-Type, Accept'
-  );
-  next();
-});
+const {
+  authenticationJwt
+} = require('../../utils/authUtils');
 
-// Protect all routes after this middleware
 
 router.use(authenticationJwt);
 
-router.route('/')
-      .get(requirePermission('user:view'),userController.getAllUsers)
-      .delete(requirePermission('user:delete'),userController.deleteUsers)
+router.get('/', userController.getAllUsers);
+router.post('/', userController.createUser);
+router.get('/:userId', userController.getUser);
+router.patch('/:userId', userController.updateUser);
+router.patch('/:userId/status', userController.updateUserStatus);
 
-router.route('/:userId')
-  .get(requirePermissionOrSelf('user:view'),userController.getUser)
-  .patch(userController.uploaduserAttachements,requirePermissionOrSelf('user:update'),userController.updateUser)
-  .delete(requirePermission('user:delete'),userController.deleteUser);
+router.patch('/:userId/reset-password', userController.resetPassword);
 
-router.patch('/:userId/resetPassword',requirePermission('user:resetPassword'),userController.resetPassword);
-router.patch("/:userId/status",requirePermission('user:update'),userController.updateUserStatus);
-router.route('/sendEmails').post(requirePermission('user:sendEmail'),userController.sendEmailMessages)
+router.delete('/:userId', userController.deleteUser);
 
-router.route('/import').post(userController.uploaduserFile,requirePermission('user:import'),userController.importUsers)
-router.route('/export/to-excel-pdf').get(requirePermission('user:export'),userController.exportUsers)
-router.route('/report/dashboard').get(requirePermission('report:view'),userController.getUserDashboardSummary)
-
-module.exports=router
-
+module.exports = router;
 
 /**
  * @swagger
  * tags:
  *   name: Users
- *   description: User management routes
+ *   description: User account management
  */
+
 
 /**
  * @swagger
- * /user:
+ * /users:
  *   get:
  *     summary: Get all users
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: List of users
- *       403:
- *         description: Forbidden
- */
-
-/**
- * @swagger
- * /user/{userId}:
- *   get:
- *     summary: Get user by ID
- *     tags: [Users]
  *     parameters:
- *       - name: userId
- *         in: path
- *         required: true
- *         schema:
- *           type: integer
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: User details
- *       404:
- *         description: User not found
- *   patch:
- *     summary: Update user by ID
- *     tags: [Users]
- *     parameters:
- *       - name: userId
- *         in: path
- *         required: true
- *         schema:
- *           type: integer
- *     requestBody:
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             properties:
- *               profileImage:
- *                 type: string
- *                 format: binary
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: User updated
- *   delete:
- *     summary: Delete user by ID
- *     tags: [Users]
- *     parameters:
- *       - name: userId
- *         in: path
- *         required: true
- *         schema:
- *           type: integer
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: User deleted
- */
-
-/**
- * @swagger
- * /user/{userId}/resetPassword:
- *   patch:
- *     summary: Reset a user's password
- *     tags: [Users]
- *     parameters:
- *       - name: userId
- *         in: path
- *         required: true
- *         schema:
- *           type: integer
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Password reset
- */
-
-/**
- * @swagger
- * /user/{userId}/status:
- *   patch:
- *     summary: Update a user's status (active/inactive)
- *     tags: [Users]
- *     parameters:
- *       - name: userId
- *         in: path
- *         required: true
- *         schema:
- *           type: integer
+ *       - name: search
+ *         in: query
+ *       - name: roleId
+ *         in: query
  *       - name: isActive
  *         in: query
- *         required: true
- *         schema:
- *           type: boolean
- *     security:
- *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Status updated
+ *         description: Users fetched successfully
  */
 
 
 /**
  * @swagger
- * /user/import:
+ * /users:
  *   post:
- *     summary: Import users from Excel file
+ *     summary: Create user account
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             properties:
- *               file:
- *                 type: string
- *                 format: binary
+ *         application/json:
+ *           example:
+ *             fullName: Kalayu Redae
+ *             phoneNumber: "0943662611"
+ *             email: kalayu@example.com
+ *             password: Password@123
+ *             roleId: 4
  *     responses:
- *       200:
- *         description: Users imported
+ *       201:
+ *         description: User created successfully
  */
+
 
 /**
  * @swagger
- * /user/export/to-excel-pdf:
+ * /users/{userId}:
  *   get:
- *     summary: Export users in Excel or PDF format
+ *     summary: Get single user
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
- *       - name: format
- *         in: query
+ *       - name: userId
+ *         in: path
+ *         required: true
  *         schema:
- *           type: string
- *           enum: [excel, pdf]
- *     security:
- *       - bearerAuth: []
+ *           type: integer
  *     responses:
  *       200:
- *         description: File generated
- *         content:
- *           application/octet-stream:
- *             schema:
- *               type: string
- *               format: binary
+ *         description: User fetched successfully
  */
+
 
 /**
  * @swagger
- * /user/report/dashboard:
- *   get:
- *     summary: Get dashboard summary for users
+ * /users/{userId}:
+ *   patch:
+ *     summary: Update user
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Dashboard data
  */
 
+
+/**
+ * @swagger
+ * /users/{userId}/status:
+ *   patch:
+ *     summary: Activate or deactivate user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ */
+
+
+/**
+ * @swagger
+ * /users/{userId}/reset-password:
+ *   patch:
+ *     summary: Reset user password
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ */
+
+
+/**
+ * @swagger
+ * /users/{userId}:
+ *   delete:
+ *     summary: Delete user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ */

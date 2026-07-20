@@ -1,24 +1,33 @@
 'use strict';
+
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('Users', {
       id: { type: Sequelize.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true },
-      businessId: { type: Sequelize.INTEGER.UNSIGNED, allowNull: false },
-      branchId: { type: Sequelize.INTEGER.UNSIGNED, allowNull: true },
-      roleId: { type: Sequelize.INTEGER.UNSIGNED, allowNull: false },
-      fullName: { type: Sequelize.STRING, allowNull: false },
-      phoneNumber: { type: Sequelize.STRING, allowNull: false, unique: true },
-      email: { type: Sequelize.STRING },
-      password: { type: Sequelize.STRING },
+      roleId: { type: Sequelize.INTEGER.UNSIGNED, allowNull: false, references: { model: 'Roles', key: 'id' }, onUpdate: 'CASCADE', onDelete: 'RESTRICT' },
+
+      fullName: { type: Sequelize.STRING(150), allowNull: false },
+      phoneNumber: { type: Sequelize.STRING(20), allowNull: false, unique: true },
+      email: { type: Sequelize.STRING(120), unique: true },
+      password: { type: Sequelize.STRING, allowNull: false },
       profileImage: { type: Sequelize.STRING },
-      address: { type: Sequelize.STRING },
-      isActive: { type: Sequelize.BOOLEAN, defaultValue: true },
-      passwordResetOTP: { type: Sequelize.STRING },
+
+      isVerified: { type: Sequelize.BOOLEAN, allowNull: false, defaultValue: false },
+      isActive: { type: Sequelize.BOOLEAN, allowNull: false, defaultValue: true },
+      changePassword: { type: Sequelize.BOOLEAN, allowNull: false, defaultValue: true },
+
+      lastLogin: { type: Sequelize.DATE },
+      passwordResetOTP: { type: Sequelize.STRING(10) },
       passwordResetOTPExpires: { type: Sequelize.DATE },
-      changePassword: { type: Sequelize.BOOLEAN, defaultValue: true },
-      createdAt: { allowNull: false, type: Sequelize.DATE },
-      updatedAt: { allowNull: false, type: Sequelize.DATE }
+
+      createdAt: { type: Sequelize.DATE, allowNull: false },
+      updatedAt: { type: Sequelize.DATE, allowNull: false }
     });
+
+    await queryInterface.addIndex('Users', ['roleId']);
+    await queryInterface.addIndex('Users', ['phoneNumber'], { unique: true });
+    await queryInterface.addIndex('Users', ['email'], { unique: true });
+    await queryInterface.addIndex('Users', ['isActive']);
   },
 
   async down(queryInterface) {

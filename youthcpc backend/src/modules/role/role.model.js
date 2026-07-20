@@ -17,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
       name: { type: DataTypes.STRING, allowNull: false },
       code: { type: DataTypes.STRING, allowNull: false },
       description: { type: DataTypes.STRING },
+      isSystem: { type: DataTypes.BOOLEAN, defaultValue: false },
       isActive: { type: DataTypes.BOOLEAN, defaultValue: true }
     },
     {

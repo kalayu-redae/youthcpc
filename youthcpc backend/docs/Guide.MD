@@ -5,7 +5,6 @@ npx sequelize-cli db:migrate:undo:all
 npx sequelize-cli db:seed:all
 npx sequelize-cli db:seed:undo:all
 
-
 # 1) Creating Model and Migration for the first time
 a) Create new table(Ex:User)
 # npx sequelize-cli model:generate --name User --attributes name:string,

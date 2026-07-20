@@ -1,24 +1,27 @@
+'use strict';
+
 const swaggerJSDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
 const options = {
   definition: {
-    openapi: '3.0.0',
+    openapi: '3.0.3',
+
     info: {
-      title: 'Youth CPC API Documentation',
+      title: 'CPCT Youth Platform API',
       version: '1.0.0',
-      description: `API documentation for Youth CPC platform  📞 Phone: 0943662611`,
+      description: 'REST API documentation for the CPCT Youth Platform.',
       contact: {
-        name: "youthcpc",
-        email: "info@youthcpc.com",
+        name: 'CPCT Youth Platform',
+        email: 'info@youthcpc.com'
       }
     },
 
     servers: [
       {
         url: '/api/youthcpc',
-        description: 'Live API Server (Relative Path)',
-      },
+        description: 'Development Server'
+      }
     ],
 
     components: {
@@ -26,27 +29,30 @@ const options = {
         bearerAuth: {
           type: 'http',
           scheme: 'bearer',
-          bearerFormat: 'JWT',
-        },
-      },
+          bearerFormat: 'JWT'
+        }
+      }
     },
 
     security: [
       {
-        bearerAuth: [],
-      },
-    ],
+        bearerAuth: []
+      }
+    ]
   },
+
   apis: ['./src/modules/**/*.routes.js']
-  // apis: ['./routes/**/*.js'], // all route files
 };
+
+const swaggerSpec = swaggerJSDoc(options);
 
 module.exports = (app) => {
   app.use(
     '/api-docs',
-    swaggerUi.serve, (req, res) => {
-      const swaggerSpec = swaggerJSDoc(options); // regenerate on each request
-      swaggerUi.setup(swaggerSpec)(req, res);
-    });
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerSpec, {
+      explorer: true,
+      customSiteTitle: 'CPCT Youth Platform API Documentation'
+    })
+  );
 };
-

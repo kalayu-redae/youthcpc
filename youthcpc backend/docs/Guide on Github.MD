@@ -1,9 +1,9 @@
 # 📘 HMS Git Workflow
 👉 Repo:
-`https://github.com/KalayuRedae2016/HospitalManagmentSystem`
+`https://github.com/kalayu-redae/youthcpc`
 
 # 1. FIRST TIME SETUP (ONLY ONCE)
-git clone https://github.com/KalayuRedae2016/HospitalManagmentSystem.git
+git clone https://github.com/kalayu-redae/youthcpc.git
 
 cd HospitalManagmentSystem
 

@@ -30,8 +30,8 @@ app.use(hpp({ whitelist: ["id"] }));
 
 // CORS
 const corsOptions = process.env.NODE_ENV === "production"
-  ? { origin: ["http://localhost:5173","https://hms.sophortechnologies.com"], methods: ["GET","POST","PUT","PATCH","DELETE","OPTIONS"], credentials: true }
-  : { origin: ["*"], methods: ["GET","POST","PUT","PATCH","DELETE","OPTIONS"] };
+  ? { origin: ["http://localhost:5173", "https://youthcpc.kalayuredae.com"], methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"], credentials: true }
+  : { origin: ["*"], methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"] };
 app.use(cors(corsOptions));
 app.options(/.*/, cors());
 
@@ -73,8 +73,8 @@ if (fs.existsSync(modulesPath)) {
       const router = require(routesFile);
 
       if (router && typeof router === 'function') {
-        app.use(`/api/hms/${moduleName}`, router);
-        //console.log(`✅ Module loaded: ${moduleName}`);
+        app.use(`/api/youthcpc/${moduleName}`, router);
+        console.log(`✅ Module loaded: ${moduleName}`);
       } else {
         console.warn(`⚠️ Invalid router in ${moduleName}`);
       }

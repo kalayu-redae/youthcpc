@@ -1,266 +1,582 @@
 'use strict';
 
-const { Role, User, Permission, Branch } = require('../../models');
+
+const { Role, User } = require('../../models');
+
 const { Op } = require('sequelize');
+
 const catchAsync = require('../../utils/catchAsync');
+
 const AppError = require('../../utils/appError');
 
-const allowedUpdateFields = ['name', 'code', 'description', 'isActive'];
+
+
+const allowedUpdateFields = [
+  'name',
+  'description',
+  'isActive'
+];
+
+
+
+// CREATE ROLE
 
 exports.createRole = catchAsync(async (req, res, next) => {
-  const { branchId, name, code, description } = req.body;
 
-  if (!branchId || !name || !code) {
-    return next(new AppError('branchId, name and code are required', 400));
-  }
 
-  const existingRole = await Role.findOne({
-    where: {
-      businessId: req.user.businessId,
-      branchId,
-      code
-    }
-  });
-
-  if (existingRole) {
-    return next(new AppError('Role code already exists in this Branch', 409));
-  }
-
-  const role = await Role.create({
-    businessId: req.user.businessId,
-    branchId,
+  const {
     name,
     code,
-    description,
-    isActive: true
+    description
+  } = req.body;
+
+
+
+  const existingRole = await Role.findOne({
+
+    where: {
+      [Op.or]: [
+        { name },
+        { code }
+      ]
+    }
+
   });
+
+
+
+  if (existingRole) {
+
+    return next(
+      new AppError(
+        'Role name or code already exists',
+        409
+      )
+    );
+
+  }
+
+
+
+  const role = await Role.create({
+
+    name,
+
+    code,
+
+    description,
+
+    isActive: true
+
+  });
+
+
 
   res.status(201).json({
+
     status: 1,
+
     message: 'Role created successfully',
+
     data: role
+
   });
+
+
 });
 
+// GET ALL ROLES
 exports.getRoles = catchAsync(async (req, res, next) => {
-  const { branchId, search, isActive } = req.query;
+  const {
+    search,
+    isActive
+  } = req.query;
 
-  const whereClause = {
-    businessId: req.user.businessId
-  };
 
-  if (branchId) whereClause.branchId = branchId;
+
+  const where = {};
+
+
 
   if (search) {
-    whereClause[Op.or] = [
-      { name: { [Op.like]: `%${search}%` } },
-      { code: { [Op.like]: `%${search}%` } },
-      { description: { [Op.like]: `%${search}%` } }
+
+    where[Op.or] = [
+
+      {
+        name: {
+          [Op.like]: `%${search}%`
+        }
+      },
+
+      {
+        code: {
+          [Op.like]: `%${search}%`
+        }
+      }
+
     ];
+
   }
+
+
 
   if (isActive !== undefined) {
-    whereClause.isActive = isActive === 'true';
+
+    where.isActive =
+      isActive === 'true';
+
   }
+
+
+
 
   const roles = await Role.findAll({
-    where: whereClause,
+
+    where,
+
     include: [
-      { model: Branch, as: 'branch', attributes: ['id', 'name'] }
+
+      {
+
+        model: User,
+
+        as: 'users',
+
+        attributes: ['id']
+
+      }
+
+    ],
+
+    order: [
+      ['createdAt', 'DESC']
     ]
+
   });
+
+
+
 
   res.status(200).json({
+
     status: 1,
+
     results: roles.length,
+
     data: roles
+
   });
+
+
 });
 
+// GET ROLE BY ID
 exports.getRole = catchAsync(async (req, res, next) => {
-  const role = await Role.findOne({
-    where: {
-      id: req.params.roleId,
-      businessId: req.user.businessId
-    },
-    include: [
-      { model: Permission, as: 'permissions', through: { attributes: [] } },
-      { model: Branch, as: 'Branch' },
-    ]
-  });
+
+  const role = await Role.findByPk(
+    req.params.roleId,
+    {
+
+      include: [
+
+        {
+
+          model: User,
+
+          as: 'users',
+
+          attributes: [
+            'id',
+            'fullName',
+            'email'
+          ]
+
+        }
+
+      ]
+
+    }
+
+  );
+
+
 
   if (!role) {
-    return next(new AppError('Role not found', 404));
+
+    return next(
+      new AppError(
+        'Role not found',
+        404
+      )
+    );
+
   }
 
+
+
   res.status(200).json({
+
     status: 1,
+
     data: role
+
   });
+
+
 });
+
+
+
+
+// UPDATE ROLE
 
 exports.updateRole = catchAsync(async (req, res, next) => {
-  const role = await Role.findOne({
-    where: {
-      id: req.params.roleId,
-      businessId: req.user.businessId
-    }
-  });
+
+
+  const role = await Role.findByPk(
+    req.params.roleId
+  );
+
+
 
   if (!role) {
-    return next(new AppError('Role not found', 404));
+
+    return next(
+      new AppError(
+        'Role not found',
+        404
+      )
+    );
+
   }
 
+
+
+
+  if (role.isSystem && req.body.isActive === false) {
+
+    return next(
+      new AppError(
+        'System roles cannot be deactivated',
+        403
+      )
+    );
+
+  }
+
+
+
   const filteredBody = {};
+
+
+
   allowedUpdateFields.forEach(field => {
+
+
     if (req.body[field] !== undefined) {
+
       filteredBody[field] = req.body[field];
+
     }
+
+
   });
+
+
 
   await role.update(filteredBody);
 
+
+
   res.status(200).json({
+
     status: 1,
+
     message: 'Role updated successfully',
+
     data: role
+
   });
+
+
 });
+
+
+
+
+// DELETE ROLE (SOFT DELETE)
 
 exports.deleteRole = catchAsync(async (req, res, next) => {
-  const role = await Role.findOne({
-    where: {
-      id: req.params.roleId,
-      businessId: req.user.businessId
-    }
-  });
 
-  if (!role) {
-    return next(new AppError('Role not found', 404));
-  }
 
-  role.isActive = false;
-  await role.save();
-
-  res.status(200).json({
-    status: 1,
-    message: 'Role deactivated successfully'
-  });
-});
-
-exports.changeUsersToRole = catchAsync(async (req, res, next) => {
-  const { userIds } = req.body;
-
-  if (!Array.isArray(userIds)) {
-    return next(new AppError('userIds must be an array', 400));
-  }
-
-  const role = await Role.findOne({
-    where: {
-      id: req.params.roleId,
-      businessId: req.user.businessId
-    }
-  });
-
-  if (!role) return next(new AppError('Role not found', 404));
-  if (!role.isActive) return next(new AppError('Role is inactive', 400));
-
-  await User.update(
-    { roleId: role.id },
-    {
-      where: {
-        id: { [Op.in]: userIds },
-        businessId: req.user.businessId
-      }
-    }
+  const role = await Role.findByPk(
+    req.params.roleId
   );
 
+
+
+  if (!role) {
+
+    return next(
+      new AppError(
+        'Role not found',
+        404
+      )
+    );
+
+  }
+
+
+
+  if (role.isSystem) {
+
+    return next(
+      new AppError(
+        'System roles cannot be deleted',
+        403
+      )
+    );
+
+  }
+
+
+
+  role.isActive = false;
+
+
+  await role.save();
+
+
+
   res.status(200).json({
-    error:false,
+
     status: 1,
-    message: `Users assigned to role ${role.code}successfully`
+
+    message: 'Role deactivated successfully'
+
   });
+
+
 });
+
+
+
+
+// ASSIGN USERS TO ROLE
+
+exports.changeUsersToRole = catchAsync(async (req, res, next) => {
+
+
+  const {
+    userIds
+  } = req.body;
+
+
+
+  if (!Array.isArray(userIds)) {
+
+    return next(
+      new AppError(
+        'userIds must be an array',
+        400
+      )
+    );
+
+  }
+
+
+
+  const role = await Role.findByPk(
+    req.params.roleId
+  );
+
+
+
+  if (!role) {
+
+    return next(
+      new AppError(
+        'Role not found',
+        404
+      )
+    );
+
+  }
+
+
+
+  if (!role.isActive) {
+
+    return next(
+      new AppError(
+        'Role is inactive',
+        400
+      )
+    );
+
+  }
+
+
+
+  await User.update(
+
+    {
+      roleId: role.id
+    },
+
+    {
+
+      where: {
+        id: {
+          [Op.in]: userIds
+        }
+      }
+
+    }
+
+  );
+
+
+
+  res.status(200).json({
+
+    status: 1,
+
+    message: 'Users assigned successfully'
+
+  });
+
+
+});
+
+
+
+
+// USERS BY ROLE
 
 exports.getUsersByRole = catchAsync(async (req, res, next) => {
-  const role = await Role.findOne({
-    where: {
-      id: req.params.roleId,
-      businessId: req.user.businessId
-    },
-    include: [
-      { model: User, as: 'users', attributes: ['id', 'fullName', 'email'] }
-    ]
-  });
+
+
+  const role = await Role.findByPk(
+
+    req.params.roleId,
+
+    {
+
+      include: [
+
+        {
+
+          model: User,
+
+          as: 'users',
+
+          attributes: [
+            'id',
+            'fullName',
+            'email'
+          ]
+
+        }
+
+      ]
+
+    }
+
+  );
+
+
 
   if (!role) {
-    return next(new AppError('Role not found', 404));
+
+    return next(
+      new AppError(
+        'Role not found',
+        404
+      )
+    );
+
   }
 
+
+
   res.status(200).json({
+
     status: 1,
+
     role: role.code,
+
     users: role.users
+
   });
+
+
 });
 
-exports.getbranchesByRole = catchAsync(async (req, res, next) => {
 
-  const role = await Role.findOne({
-    where: {
-      id: req.params.roleId,
-      businessId: req.user.businessId
-    },
-    include: [
-      {
-        model: Branch,
-        as: 'Branch',  
-        attributes: ['id', 'name', 'location']
-      }
-    ]
-  });
 
-  if (!role) {
-    return next(new AppError('Role not found', 404));
-  }
 
-  res.status(200).json({
-    status: 1,
-    role: role.code,
-    Branch: role.Branch  
-  });
-});
+// ROLE SUMMARY
 
 exports.getRoleSummary = catchAsync(async (req, res, next) => {
 
+
   const roles = await Role.findAll({
-    where: { businessId: req.user.businessId },
+
     include: [
-      { model: User, as: 'users', attributes: ['id'] },
-      { model: Permission, as: 'permissions', through: { attributes: [] } },
-      { model: Branch, as: 'Branch', attributes: ['id', 'name'] }
+
+      {
+
+        model: User,
+
+        as: 'users',
+
+        attributes: ['id']
+
+      }
+
     ]
+
   });
 
-const activeroles = roles.filter(r => r.isActive).length;
-const inactiveroles = roles.filter(r => !r.isActive).length;
 
-  const summary = roles.map(role => ({
-    roleId: role.id,
-    roleName: role.name,
-    roleCode: role.code,
-    isActive: role.isActive,
-    totalUsers: role.users?.length || 0,
-    totalPermissions: role.permissions?.length || 0,
-    branchId: role.Branch?.id || null,
-    BranchName: role.Branch?.name || null
-  }));
+
+  const activeRoles =
+    roles.filter(r => r.isActive).length;
+
+
+
+  const inactiveRoles =
+    roles.filter(r => !r.isActive).length;
+
+
+
 
   res.status(200).json({
+
     status: 1,
+
     totalRoles: roles.length,
-    activeroles,
-    inactiveroles,
-    data: summary
+
+    activeRoles,
+
+    inactiveRoles,
+
+    data: roles.map(role => ({
+
+      id: role.id,
+
+      name: role.name,
+
+      code: role.code,
+
+      users: role.users.length,
+
+      isActive: role.isActive
+
+    }))
+
   });
+
+
 });

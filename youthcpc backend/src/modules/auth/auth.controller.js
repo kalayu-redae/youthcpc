@@ -1,307 +1,274 @@
+'use strict';
+
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { User, Role } = require('../../models');
-const { Op, where } = require('sequelize');
-
+const { Op } = require('sequelize');
 const catchAsync = require('../../utils/catchAsync');
-const AppError = require("../../utils/appError")
-const {createMulterMiddleware,processUploadFilesToSave,deleteFile} = require('../../utils/fileUtils');
+const AppError = require('../../utils/appError');
+const { createMulterMiddleware, processUploadFilesToSave, deleteFile } = require('../../utils/fileUtils');
+const { sendEmail, sendWelcomeEmail } = require('../../utils/emailUtils');
 
 require('dotenv').config();
 
-//console.log("Loading model: ", db);
-const { sendEmail, sendWelcomeEmail } = require('../../utils/emailUtils');
-// const {logAction}=require("../utils/logUtils")
-
 const signInToken = (user) => {
-  // console.log("user",user)
-  console.log("user roleId",user.role.id)
-  const payload = { id: user.id, role: user.role.id};
+  const payload = { id: user.id, role: user.roleId };
   return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
 };
 
-// Configure multer for payment file uploads
 const userUpload = createMulterMiddleware(
   'uploads/users/',
   'user',
-  [
-    'image/jpeg',
-    'image/png',
-    'application/pdf',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    'application/vnd.ms-excel'
-  ]
+  ['image/jpeg', 'image/png', 'application/pdf', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel']
 );
 
-// Middleware for handling multiple file 
-exports.uploaduserAttachements=userUpload.fields([
-    { name: 'profileImage', maxCount: 1 },
-    { name: 'images', maxCount: 5 },
-    { name: 'documents', maxCount: 10 },
-    { name: 'logo', maxCount: 1 },
-  ])
+exports.uploadUserAttachments = userUpload.fields([
+  { name: 'profileImage', maxCount: 1 },
+  { name: 'images', maxCount: 5 },
+  { name: 'documents', maxCount: 10 }
+]);
 
-// Signup controller
 exports.signup = catchAsync(async (req, res, next) => {
-  console.log("registration request", req.body)
-  console.log("profileImages", req.files)
-  console.log('User model:', User);
-  const { fullName, phoneNumber,roleId,branchId, password, email, address} = req.body;
-  const role = await Role.findOne({where:{isActive:true}});
+  console.log('req.body:', req.body);
+  const { fullName, phoneNumber, email, password, roleId } = req.body;
 
-//   /* my updates: the roleId, branchId, businessId  can not come from req.body*/
-//     if(!role){
-//        return next(new AppError("No active role found", 404));
-//     }
-//     const roleId = role.id;
-//     console.log('User roleId:', roleId);
-//   const branch = await Branch.findOne({
-//                  where: { isActive: true }
-//                 });
-//         if (!branch) {
-//           return next(new AppError("No active branch found", 404));
-//         }
-//        const branchId = branch.id;
-//        console.log('User branchId:', branchId);
-// /* my updates: the roleId, branchId, businessId  can not come from req.body*/
-
-
-  if (!fullName ||!roleId|| !phoneNumber || !password) {
-    return next(new AppError("missing required Fields(name,phone or password)", 404))
-  }
-
-  let { profileImage, documents } = await processUploadFilesToSave(req, req.files, req.body)
-  if(!profileImage){
-  profileImage=`${req.protocol}://${req.get('host')}/uploads/default.png`;// full URL to default image
-  }
+  if (!fullName || !phoneNumber || !password || !roleId)
+    return next(new AppError("Full name,phone number,password and role are required", 400));
 
   const existingUser = await User.findOne({ where: { phoneNumber } });
-  if (existingUser) {
-    if (req.files) deleteFile(req.files.path);
-    return (next(new AppError("PhoneNumber already in use", 404)))
-  }
-console.log("requested user",req.user)
+  console.log('existingUser:', existingUser);
 
-  // const hashedPassword = await bcrypt.hash(password, 12);// Hash password see on hooks
+  if (existingUser)
+    return next(new AppError("Phone number already exists", 409));
 
-  const newUser = await User.create({
-    businessId: 1, // Default businessId, adjust as needed
-    branchId: branchId,
-    roleId:roleId,
+  let { profileImage } = await processUploadFilesToSave(req, req.files, req.body);
+
+  if (!profileImage)
+    profileImage = `${req.protocol}://${req.get('host')}/uploads/default.png`;
+
+  const role = await Role.findOne({
+    where: { id: roleId, isActive: true }
+  });
+
+  if (!role)
+    return next(new AppError("Invalid role selected", 400));
+
+  const user = await User.create({
     fullName,
     phoneNumber,
     email,
-    address,
     password,
-    profileImage: profileImage,
-  });
-  //await logAction
-  await sendWelcomeEmail(newUser, password)
-
-  // Return success response
-  res.status(200).json({
-    message: 'User registered successfully.',
-    data: newUser,
+    roleId,
+    profileImage
   });
 
+  await sendWelcomeEmail(user, password);
+
+  res.status(201).json({
+    status: 1,
+    message: "User registered successfully",
+    data: user
+  });
 });
 
 exports.login = catchAsync(async (req, res, next) => {
   const { phoneNumber, password } = req.body;
-  console.log("Request body:", req.body);
 
-  // Input validation
-  if (!phoneNumber) return next(new AppError("Please provide valid phone number", 404));
-  if (!password) return next(new AppError("Please provide valid password", 404));
+  if (!phoneNumber || !password)
+    return next(new AppError("Phone number and password are required", 400));
 
-  // Find user by email
-  const user = await User.findOne({ 
-    where: { phoneNumber } ,
-    include: { model: Role,as: 'role' } 
+  const user = await User.scope('withPassword').findOne({
+    where: { phoneNumber },
+    include: [
+      {
+        model: Role,
+        as: 'role'
+      }
+    ]
   });
-  
-  if (!user) {
-    return next(new AppError("Invalid credentials. Please try again or reset your password", 401));
-  }
 
-  // Compare password
-  const correct = await bcrypt.compare(password, user.password);
-  if (!correct) return next(new AppError("Invalid or incorrect password", 404));
+  if (!user)
+    return next(new AppError("Invalid credentials", 401));
+
+  if (!user.isActive)
+    return next(new AppError("Account is inactive", 403));
+
+  // const correctPassword = await bcrypt.compare(password, user.password);
+  const correctPassword = await user.checkPassword(password);
+  if (!correctPassword) return next(new AppError("Invalid credentials", 401));
+
+  user.lastLogin = new Date();
+  await user.save({ hooks: false });
 
   const token = signInToken(user);
-  //console.log("LoggedInUser",user)
+
   res.status(200).json({
     status: 1,
     token,
     user,
     role: user.role ? user.role.code : null,
-    permissions: user.role ? user.role.permissions : [],
     changePassword: user.changePassword,
     message: user.changePassword
-      ? 'Login successful, but you must change your password.'
-      : 'Login successful.',
+      ? "Login successful,please change your password"
+      : "Login successful"
   });
 });
 
 exports.forgetPassword = catchAsync(async (req, res, next) => {
-  console.log("requested body", req.body)
-  const { email } = req.body
+  const { email } = req.body;
+
   const user = await User.findOne({ where: { email } });
-  if (!user) {
-    return next(new AppError('There is no User with the email', 404));
-  }
-  // console.log(user)
 
-  const resetOTPCode = user.createPasswordResetOTP()
+  if (!user)
+    return next(new AppError("No user found with this email", 404));
+
+  const otp = user.createPasswordResetOTP();
+
   await user.save();
-  console.log("resetOtpCode", resetOTPCode)
 
-  try {
-    const email = user.email;
-    const subject = 'Password Reset Verification Code';
-    const message = `Your OTP code for password reset is: ${resetOTPCode}.\nIt will expire in 10 minutes.\nIf you didn't request this, please ignore the message.`;
-    console.log(email, subject, message)
-
-    await sendEmail({ email, subject, message });
-    res.status(200).json({
-      status: 1,
-      passwordResetOTP: resetOTPCode,
-      message: 'Reset token Sent to Email Succeffully',
-    });
-  } catch (err) {
-    //console.log(err);
-    user.passwordResetOTP = undefined;
-    user.passwordResetOTPExpires = undefined;
-    await user.save();
-
-    return next(
-      new AppError('There was an error sending the email. Try again later!'), 500);
-  }
-});
-exports.verifyOTP = catchAsync(async (req, res, next) => {
-  console.log("Incoming body:", req.body);
-
-  const { email, passwordResetOTP } = req.body;
-  if (!email || !passwordResetOTP) {
-    return next(new AppError('Email and OTP code are required.', 400));
-  }
-
-  const user = await User.findOne({
-    where: { email, passwordResetOTP, passwordResetOTPExpires: { [Op.gt]: new Date() } }
+  await sendEmail({
+    email: user.email,
+    subject: "Password Reset OTP",
+    message: `Your password reset OTP is ${otp}. It expires in 10 minutes.`
   });
 
-  console.log("user", user)
-  if (!user) {
-    return next(new AppError('Invalid or expired OTP code.', 404));
-  }
+  res.status(200).json({
+    status: 1,
+    message: "OTP sent successfully"
+  });
+});
+
+exports.verifyOTP = catchAsync(async (req, res, next) => {
+  const { email, passwordResetOTP } = req.body;
+
+  if (!email || !passwordResetOTP)
+    return next(new AppError("Email and OTP are required", 400));
+
+  const user = await User.findOne({
+    where: {
+      email,
+      passwordResetOTP,
+      passwordResetOTPExpires: { [Op.gt]: new Date() }
+    }
+  });
+
+  if (!user)
+    return next(new AppError("Invalid or expired OTP", 400));
 
   user.passwordResetOTP = null;
   user.passwordResetOTPExpires = null;
+
   await user.save();
 
   res.status(200).json({
     status: 1,
-    message: 'OTP Verified successfully. Proceed to reset password.'
+    message: "OTP verified successfully"
   });
 });
 
 exports.resetPassword = catchAsync(async (req, res, next) => {
-  console.log("Incoming body:", req.body);
-  const { email, newPassword } = req.body
+  const { email, newPassword } = req.body;
 
-  const user = await User.findOne({ where: { email: email } });
-  if (!user) {
-    return next(new AppError('User is not found.', 404));
-  }
+  const user = await User.findOne({
+    where: { email }
+  });
 
-  // /const hashedNewPassword = await bcrypt.hash(newPassword, 12);
-  // user.password = hashedNewPassword;
-  user.password=newPassword
+  if (!user)
+    return next(new AppError("User not found", 404));
+
+  user.password = newPassword;
+  user.changePassword = false;
+
   await user.save();
 
-  const token = signInToken(user);
-console.log("userrr", user)
   res.status(200).json({
     status: 1,
-    user: user,
-    userId: user.id,
-    role: user.role,
-    token: token,
-    message: "Password Reseted Succeffully",
-  })
+    message: "Password reset successfully"
+  });
 });
 
 exports.updateMyPassword = catchAsync(async (req, res, next) => {
-  console.log("requested body", req.body)
-  // console.log("requestUsers", req.user)
   const { currentPassword, newPassword } = req.body;
-  if (!currentPassword || !newPassword) {
-    return res.status(400).json({ message: 'Please provide both current and new passwords' });
-  }
+
+  if (!currentPassword || !newPassword)
+    return next(new AppError("Current and new password are required", 400));
 
   const user = await User.findByPk(req.user.id);
-  if (!user) return res.status(404).json({ message: 'User not found' });
-  
-  const correct = await bcrypt.compare(currentPassword, user.password);
-  if (!correct)   return res.status(401).json({ message: 'Incorrect current password' });
-  
-  if (newPassword.length < 8) {
-    return res.status(400).json({ message: 'New password must be at least 8 characters long' });
-  }
 
-  //const hashedNewPassword = await bcrypt.hash(newPassword, 12);
-  user.password = newPassword
-  user.changePassword = false
+  if (!user)
+    return next(new AppError("User not found", 404));
+
+  const correct = await bcrypt.compare(currentPassword, user.password);
+
+  if (!correct)
+    return next(new AppError("Current password is incorrect", 401));
+
+  user.password = newPassword;
+  user.changePassword = false;
+
   await user.save();
 
   res.status(200).json({
     status: 1,
-    message: 'Password updated successfully'
+    message: "Password updated successfully"
   });
-
 });
 
 exports.getMe = catchAsync(async (req, res, next) => {
-  console.log("requestUser", req.user)
-  const user=await User.findByPk(req.user.id,{
-    attributes: { exclude: ['password','passwordResetOTP','passwordResetOTPExpires'] }
-  })
+  const user = await User.findByPk(req.user.id, {
+    attributes: {
+      exclude: [
+        'password',
+        'passwordResetOTP',
+        'passwordResetOTPExpires'
+      ]
+    },
+    include: [
+      {
+        model: Role,
+        as: 'role'
+      }
+    ]
+  });
 
-  if(!user) return next(new AppError("No user Found",404))
+  if (!user)
+    return next(new AppError("User not found", 404));
+
   res.status(200).json({
     status: 1,
-    message: "get my Profile succefully",
-    data:user
+    data: user
   });
-})
+});
+
 exports.updateMe = catchAsync(async (req, res, next) => {
-  console.log("requested body",req.body)
   const user = await User.findByPk(req.user.id);
-  if (!user) return next(new AppError("No user found", 404));
 
-  const allowedFields = ["fullName", "phoneNumber", "email", "address"];
-  const filteredBody = {};
+  if (!user)
+    return next(new AppError("User not found", 404));
+
+  const allowedFields = [
+    'fullName',
+    'phoneNumber',
+    'email',
+  ];
+
+  const updateData = {};
+
   allowedFields.forEach(field => {
-    if (req.body[field] !== undefined) filteredBody[field] = req.body[field];
+    if (req.body[field] !== undefined)
+      updateData[field] = req.body[field];
   });
 
-  // Validate email
-  if (filteredBody.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(filteredBody.email)) {
-    return next(new AppError("Invalid email format", 400));
-  }
-
-  // Handle profileImage from multipart/form-data
   if (req.files && req.files.profileImage) {
     const { profileImage } = await processUploadFilesToSave(req, req.files, req.body, user);
-    filteredBody.profileImage = profileImage || user.profileImage;
+    updateData.profileImage = profileImage;
   }
 
-  // Update the instance
-  await user.update(filteredBody);
+  await user.update(updateData);
 
   res.status(200).json({
     status: 1,
-    message: "User updated successfully",
-    data: user,
+    message: "Profile updated successfully",
+    data: user
   });
 });
