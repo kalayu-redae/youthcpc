@@ -179,10 +179,7 @@ exports.updateUserStatus = catchAsync(async (req, res, next) => {
 
   const user = await User.findByPk(req.params.userId);
 
-
-  if (!user)
-    return next(new AppError("User not found", 404));
-
+  if (!user) return next(new AppError("User not found", 404));
 
   user.isActive = !user.isActive;
 

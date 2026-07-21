@@ -3,13 +3,10 @@
 const router = require('express').Router();
 
 const userController = require('./user.controller');
-
-const {
-  authenticationJwt
-} = require('../../utils/authUtils');
+const { authenticationJwt } = require('../../utils/authUtils');
 
 
-router.use(authenticationJwt);
+// router.use(authenticationJwt);
 
 router.get('/', userController.getAllUsers);
 router.post('/', userController.createUser);
@@ -17,7 +14,7 @@ router.get('/:userId', userController.getUser);
 router.patch('/:userId', userController.updateUser);
 router.patch('/:userId/status', userController.updateUserStatus);
 
-router.patch('/:userId/reset-password', userController.resetPassword);
+router.patch('/:userId/resetPassword', userController.resetPassword);
 
 router.delete('/:userId', userController.deleteUser);
 
@@ -120,7 +117,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /users/{userId}/reset-password:
+ * /users/{userId}/resetPassword:
  *   patch:
  *     summary: Reset user password
  *     tags: [Users]
