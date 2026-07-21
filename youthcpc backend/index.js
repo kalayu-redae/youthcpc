@@ -89,7 +89,7 @@ if (fs.existsSync(modulesPath)) {
 // -------------------
 // Root & Error Handling
 // -------------------
-app.get("/", (req, res) => res.send("<h1>🌟 Smart HMS 🌟</h1>"));
+app.get("/", (req, res) => res.send("<h1>🌟 CPCT Youth Platform🌟</h1>"));
 
 // 404 catch-all
 app.use((req, res, next) => next(new AppError(`Can't find ${req.originalUrl},please use valid url`, 404)));
