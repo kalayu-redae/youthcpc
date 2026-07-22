@@ -67,7 +67,7 @@ module.exports = {
         roleId: getRole('MEMBER'),
         fullName: 'Youth Member',
         phoneNumber: '0911000003',
-        email: 'member@youthcpc.org',
+        email: 'kalayuredae2016@gmail.com',
         password: await bcrypt.hash('Member@123', 12),
         profileImage: null,
         isVerified: true,

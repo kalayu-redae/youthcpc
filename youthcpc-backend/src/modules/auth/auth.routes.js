@@ -39,10 +39,10 @@ module.exports = router;
  *       content:
  *         application/json:
  *           example:
- *             fullName: Kalayu Redae
- *             phoneNumber: "0943662611"
- *             email: kalayu@example.com
- *             password: Password@123
+ *             fullName:Kalayu Redae
+ *             phoneNumber:"0943662611"
+ *             email:kalayuredae2016@gmail.com
+ *             password:Member@123
  *             roleId: 4
  *             address: Mekelle
  *     responses:
