@@ -2,22 +2,21 @@
 
 const router = require('express').Router();
 const woredaController = require('./woreda.controller');
-
 const { authenticationJwt } = require('../../utils/authUtils');
 
-router.use(authenticationJwt);
+// router.use(authenticationJwt);
 
 router.post('/', woredaController.createWoreda);
 
-router.get('/', woredaController.getAllWoredas);
+router.get('/', woredaController.getWoredas);
 
-router.get('/:id', woredaController.getWoreda);
+router.get('/:woredaId', woredaController.getWoreda);
 
-router.patch('/:id', woredaController.updateWoreda);
+router.patch('/:woredaId', woredaController.updateWoreda);
 
-router.delete('/:id', woredaController.deleteWoreda);
+router.delete('/:woredaId', woredaController.deleteWoreda);
 
-router.patch('/status/:id', woredaController.updateStatus);
+router.patch('/status/:woredaId', woredaController.updateWoredaStatus);
 
 module.exports = router;
 
@@ -32,7 +31,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /woredas:
+ * /woreda:
  *   post:
  *     summary: Create a new woreda
  *     tags: [Woredas]
@@ -54,9 +53,9 @@ module.exports = router;
 
 /**
  * @swagger
- * /woredas:
+ * /woreda:
  *   get:
- *     summary: Get all woredas
+ *     summary: Get all woreda
  *     tags: [Woredas]
  *     security:
  *       - bearerAuth: []
@@ -79,7 +78,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /woredas/{id}:
+ * /woreda/{id}:
  *   get:
  *     summary: Get woreda by ID
  *     tags: [Woredas]
@@ -99,7 +98,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /woredas/{id}:
+ * /woreda/{id}:
  *   patch:
  *     summary: Update woreda
  *     tags: [Woredas]
@@ -127,7 +126,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /woredas/{id}:
+ * /woreda/{id}:
  *   delete:
  *     summary: Delete woreda
  *     tags: [Woredas]
@@ -147,7 +146,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /woredas/status/{id}:
+ * /woreda/status/{id}:
  *   patch:
  *     summary: Activate or deactivate woreda
  *     tags: [Woredas]

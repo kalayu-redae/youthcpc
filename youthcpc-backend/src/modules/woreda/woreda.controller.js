@@ -41,7 +41,6 @@ exports.createWoreda = catchAsync(async (req, res, next) => {
     });
 });
 
-
 exports.getWoredas = catchAsync(async (req, res, next) => {
     const {
         page = 1,

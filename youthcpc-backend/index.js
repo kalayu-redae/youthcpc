@@ -19,7 +19,6 @@ const app = express();
 
 swaggerSetup(app);
 
-
 app.enable("trust proxy");
 app.use(helmet());
 app.use(compression());
@@ -74,7 +73,7 @@ if (fs.existsSync(modulesPath)) {
 
       if (router && typeof router === 'function') {
         app.use(`/api/youthcpc/${moduleName}`, router);
-        console.log(`✅ Module loaded: ${moduleName}`);
+        console.log(`✅ router Module loaded : ${moduleName}`);
       } else {
         console.warn(`⚠️ Invalid router in ${moduleName}`);
       }

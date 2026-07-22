@@ -30,9 +30,9 @@ module.exports = router;
 
 /**
  * @swagger
- * /users:
+ * /user:
  *   get:
- *     summary: Get all users
+ *     summary: Get all user
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -51,7 +51,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /users:
+ * /user:
  *   post:
  *     summary: Create user account
  *     tags: [Users]
@@ -75,7 +75,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /users/{userId}:
+ * /user/{userId}:
  *   get:
  *     summary: Get single user
  *     tags: [Users]
@@ -95,7 +95,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /users/{userId}:
+ * /user/{userId}:
  *   patch:
  *     summary: Update user
  *     tags: [Users]
@@ -106,7 +106,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /users/{userId}/status:
+ * /user/{userId}/status:
  *   patch:
  *     summary: Activate or deactivate user
  *     tags: [Users]
@@ -117,7 +117,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /users/{userId}/resetPassword:
+ * /user/{userId}/resetPassword:
  *   patch:
  *     summary: Reset user password
  *     tags: [Users]
@@ -128,7 +128,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /users/{userId}:
+ * /user/{userId}:
  *   delete:
  *     summary: Delete user
  *     tags: [Users]
