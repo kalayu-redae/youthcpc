@@ -42,21 +42,10 @@ exports.createZone = catchAsync(async (req, res, next) => {
 });
 
 exports.getZones = catchAsync(async (req, res, next) => {
-    const {
-        page = 1,
-        limit = 20,
-        search,
-        regionId,
-        isActive,
-        sortBy = "name",
-        sortOrder = "ASC"
-    } = req.query;
-
+    const { page = 1, limit = 20, search, regionId, isActive, sortBy = "name", sortOrder = "ASC" } = req.query;
     const where = {};
 
-    if (regionId)
-        where.regionId = regionId;
-
+    if (regionId) where.regionId = regionId;
     if (search) {
         where[Op.or] = [
             { name: { [Op.like]: `%${search}%` } },

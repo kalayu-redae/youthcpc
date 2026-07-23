@@ -6,23 +6,43 @@ module.exports = {
 
         const now = new Date();
 
-        const [[user]] = await queryInterface.sequelize.query("SELECT id FROM Users WHERE phoneNumber='0943662611' LIMIT 1");
 
-        const [[tabiya]] = await queryInterface.sequelize.query("SELECT id FROM Tabiyas WHERE name='Waereb Deqali' LIMIT 1");
+        const [users] = await queryInterface.sequelize.query(
+            `SELECT id FROM Users LIMIT 1`
+        );
 
-        if (!user) throw new Error('User not found');
+
+        const [tabiyas] = await queryInterface.sequelize.query(
+            `SELECT id,woredaId FROM Tabiyas LIMIT 1`
+        );
+
+
+        const [woredas] = await queryInterface.sequelize.query(
+            `SELECT id,zoneId FROM Woredas LIMIT 1`
+        );
+
+
+        const [zones] = await queryInterface.sequelize.query(
+            `SELECT id,regionId FROM Zones LIMIT 1`
+        );
+
+
+        const [educationLevels] = await queryInterface.sequelize.query(
+            `SELECT id FROM EducationLevels LIMIT 1`
+        );
+
+
+        const [professions] = await queryInterface.sequelize.query(
+            `SELECT id FROM Professions LIMIT 1`
+        );
+
+
 
         await queryInterface.bulkInsert('MemberProfiles', [{
 
-            userId: user.id,
+            userId: users[0].id,
 
             membershipNumber: 'CPCT-000001',
-
-            firstName: 'Kalayu',
-
-            middleName: 'Redae',
-
-            lastName: 'Gebreab',
 
             gender: 'MALE',
 
@@ -32,31 +52,50 @@ module.exports = {
 
             nationality: 'Ethiopian',
 
-            tabiyaId: tabiya ? tabiya.id : null,
+
+            regionId: zones[0].regionId,
+
+            zoneId: zones[0].id,
+
+            woredaId: woredas[0].id,
+
+            tabiyaId: tabiyas[0].id,
+
+
+            educationLevelId: educationLevels[0].id,
+
+            professionId: professions[0].id,
+
 
             occupation: 'Software Developer',
 
-            organization: 'CPCT Youth',
+            organization: 'CPCT Youth Wing',
+
 
             employmentStatus: 'EMPLOYED',
 
-            monthlyIncome: 0,
 
-            skills: ['Leadership', 'Programming'],
+            monthlyIncome: 5000,
 
-            interests: ['Peace Building', 'Technology'],
-
-            aspirations: ['Community Leadership', 'AI Research'],
 
             availabilityStatus: 'AVAILABLE',
 
-            emergencyContactName: 'Mereseit',
+            availabilityNote: 'Available for youth activities',
 
-            emergencyContactPhone: '0911000000',
+
+            emergencyContactName: 'Redae',
+
+            emergencyContactPhone: '0911111111',
+
 
             membershipDate: now,
 
-            bio: 'System administrator.',
+
+            bio: 'Youth member profile',
+
+
+            isActive: true,
+
 
             createdAt: now,
 
@@ -65,6 +104,7 @@ module.exports = {
         }]);
 
     },
+
 
     async down(queryInterface) {
 

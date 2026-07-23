@@ -2,7 +2,6 @@
 
 const router = require('express').Router();
 const authController = require('./auth.controller');
-
 const { authenticationJwt } = require('../../utils/authUtils');
 
 router.post('/signup', authController.signup);
@@ -39,12 +38,12 @@ module.exports = router;
  *       content:
  *         application/json:
  *           example:
- *             fullName:Kalayu Redae
- *             phoneNumber:"0943662611"
- *             email:kalayuredae2016@gmail.com
- *             password:Member@123
+ *             fullName: "Kalayu Redae"
+ *             phoneNumber: "0943662611"
+ *             email: "kalayuredae2016@gmail.com"
+ *             password: "Member@123"
  *             roleId: 4
- *             address: Mekelle
+ *             address: "Mekelle"
  *     responses:
  *       201:
  *         description: User registered successfully
@@ -63,7 +62,7 @@ module.exports = router;
  *         application/json:
  *           example:
  *             phoneNumber: "0943662611"
- *             password: Password@123
+ *             password: "Password@123"
  *     responses:
  *       200:
  *         description: Login successful
@@ -81,7 +80,7 @@ module.exports = router;
  *       content:
  *         application/json:
  *           example:
- *             email: kalayu@example.com
+ *             email: "kalayu@example.com"
  *     responses:
  *       200:
  *         description: OTP sent successfully
@@ -99,7 +98,7 @@ module.exports = router;
  *       content:
  *         application/json:
  *           example:
- *             email: kalayu@example.com
+ *             email: "kalayu@example.com"
  *             passwordResetOTP: "1234"
  *     responses:
  *       200:
@@ -118,8 +117,8 @@ module.exports = router;
  *       content:
  *         application/json:
  *           example:
- *             email: kalayu@example.com
- *             newPassword: NewPassword@123
+ *             email: "kalayu@example.com"
+ *             newPassword: "NewPassword@123"
  *     responses:
  *       200:
  *         description: Password reset successfully
@@ -153,9 +152,9 @@ module.exports = router;
  *       content:
  *         application/json:
  *           example:
- *             fullName: Updated Name
- *             email: updated@example.com
- *             address: Addis Ababa
+ *             fullName: "Updated Name"
+ *             email: "updated@example.com"
+ *             address: "Addis Ababa"
  *     responses:
  *       200:
  *         description: Profile updated successfully
@@ -175,8 +174,8 @@ module.exports = router;
  *       content:
  *         application/json:
  *           example:
- *             currentPassword: OldPassword@123
- *             newPassword: NewPassword@123
+ *             currentPassword: "OldPassword@123"
+ *             newPassword: "NewPassword@123"
  *     responses:
  *       200:
  *         description: Password updated successfully

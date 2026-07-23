@@ -51,52 +51,67 @@ exports.createTabiya = catchAsync(async (req, res, next) => {
 exports.getAllTabiyas = catchAsync(async (req, res, next) => {
 
     const {
-        woredaId,
+        page = 1,
+        limit = 20,
         search,
+        regionId,
+        zoneId,
+        woredaId,
         isActive
     } = req.query;
 
-
     const where = {};
 
-
-    if (woredaId)
-        where.woredaId = woredaId;
-
+    if (search) {
+        where[Op.or] = [
+            { name: { [Op.like]: `%${search}%` } },
+            { code: { [Op.like]: `%${search}%` } }
+        ];
+    }
 
     if (isActive !== undefined)
         where.isActive = ['true', '1', true, 1].includes(isActive);
 
+    if (woredaId)
+        where.woredaId = woredaId;
 
-    if (search)
-        where.name = {
-            [Op.like]: `%${search}%`
-        };
-
-
-    const tabiyas = await Tabiya.findAll({
-
-        where,
-
-        include: [
-            {
-                model: Woreda,
-                as: 'woreda',
+    const include = [{
+        model: Woreda,
+        as: 'woreda',
+        attributes: ['id', 'name', 'code'],
+        include: [{
+            model: Zone,
+            as: 'zone',
+            attributes: ['id', 'name', 'code'],
+            include: [{
+                model: Region,
+                as: 'region',
                 attributes: ['id', 'name', 'code']
-            }
-        ],
+            }]
+        }]
+    }];
 
-        order: [
-            ['name', 'ASC']
-        ]
+    if (zoneId)
+        include[0].where = { zoneId };
 
+    if (regionId)
+        include[0].include[0].where = { regionId };
+
+    const { count, rows } = await Tabiya.findAndCountAll({
+        where,
+        include,
+        distinct: true,
+        offset: (page - 1) * limit,
+        limit: Number(limit),
+        order: [['name', 'ASC']]
     });
-
 
     res.status(200).json({
         status: 1,
-        count: tabiyas.length,
-        data: tabiyas
+        total: count,
+        currentPage: Number(page),
+        totalPages: Math.ceil(count / limit),
+        data: rows
     });
 
 });

@@ -1,224 +1,199 @@
-// const express = require("express")
-// const app = express();
-// const router = express.Router()
+'use strict';
 
-// const membercontroller = require("./member.controller")
-
-// const { authenticationJwt, requirePermission, requirePermissionOrSelf } = require('../../utils/authUtils');
-
-// router.use(function (req, res, next) {
-//   res.header(
-//     'Access-Control-Allow-Headers',
-//     'x-access-token, Origin, Content-Type, Accept'
-//   );
-//   next();
-// });
-
-// // Protect all routes after this middleware
+const router = require('express').Router();
+const memberController = require('./memberProfile.controller');
+const { authenticationJwt } = require('../../utils/authUtils');
 
 // router.use(authenticationJwt);
 
-// router.route('/')
-//   .get(requirePermission('members:view'), membercontroller.getAllUsers)
-//   .delete(requirePermission('members:delete'), membercontroller.deleteUsers)
+// Create member profile
+router.post('/', memberController.createMemberProfile);
 
-// router.route('/:userId')
-//   .get(requirePermissionOrSelf('members:view'), membercontroller.getUser)
-//   .patch(membercontroller.uploaduserAttachements, requirePermissionOrSelf('members:update'), membercontroller.updateUser)
-//   .delete(requirePermission('members:delete'), membercontroller.deleteUser);
+// Get all members with filters
+router.get('/', memberController.getMembers);
 
-// router.patch('/:userId/resetPassword', requirePermission('members:resetPassword'), membercontroller.resetPassword);
-// router.patch("/:userId/status", requirePermission('members:update'), membercontroller.updateUserStatus);
-// router.route('/sendEmails').post(requirePermission('members:sendEmail'), membercontroller.sendEmailMessages)
+// Get member summary
+router.get('/summary', memberController.getMemberSummary);
 
-// router.route('/import').post(membercontroller.uploaduserFile, requirePermission('members:import'), membercontroller.importUsers)
-// router.route('/export/to-excel-pdf').get(requirePermission('members:export'), membercontroller.exportUsers)
-// router.route('/report/dashboard').get(requirePermission('report:view'), membercontroller.getUserDashboardSummary)
+// Get single member
+router.get('/:memberId', memberController.getMemberProfile);
 
-// module.exports = router
+// Update member profile
+router.patch('/:memberId', memberController.updateMemberProfile);
 
+// Activate/deactivate member
+router.patch('/status/:memberId', memberController.updateMemberStatus);
 
-// /**
-//  * @swagger
-//  * tags:
-//  *   name: Members
-//  *   description: User management routes
-//  */
+// Delete member
+router.delete('/:memberId', memberController.deleteMemberProfile);
 
-// /**
-//  * @swagger
-//  * /members:
-//  *   get:
-//  *     summary: Get all users
-//  *     tags: [Users]
-//  *     security:
-//  *       - bearerAuth: []
-//  *     responses:
-//  *       200:
-//  *         description: List of users
-//  *       403:
-//  *         description: Forbidden
-//  */
-
-// /**
-//  * @swagger
-//  * /members/{userId}:
-//  *   get:
-//  *     summary: Get members by ID
-//  *     tags: [Users]
-//  *     parameters:
-//  *       - name: userId
-//  *         in: path
-//  *         required: true
-//  *         schema:
-//  *           type: integer
-//  *     security:
-//  *       - bearerAuth: []
-//  *     responses:
-//  *       200:
-//  *         description: User details
-//  *       404:
-//  *         description: User not found
-//  *   patch:
-//  *     summary: Update members by ID
-//  *     tags: [Users]
-//  *     parameters:
-//  *       - name: userId
-//  *         in: path
-//  *         required: true
-//  *         schema:
-//  *           type: integer
-//  *     requestBody:
-//  *       content:
-//  *         multipart/form-data:
-//  *           schema:
-//  *             type: object
-//  *             properties:
-//  *               profileImage:
-//  *                 type: string
-//  *                 format: binary
-//  *     security:
-//  *       - bearerAuth: []
-//  *     responses:
-//  *       200:
-//  *         description: User updated
-//  *   delete:
-//  *     summary: Delete members by ID
-//  *     tags: [Users]
-//  *     parameters:
-//  *       - name: userId
-//  *         in: path
-//  *         required: true
-//  *         schema:
-//  *           type: integer
-//  *     security:
-//  *       - bearerAuth: []
-//  *     responses:
-//  *       200:
-//  *         description: User deleted
-//  */
-
-// /**
-//  * @swagger
-//  * /members/{userId}/resetPassword:
-//  *   patch:
-//  *     summary: Reset a members's password
-//  *     tags: [Users]
-//  *     parameters:
-//  *       - name: userId
-//  *         in: path
-//  *         required: true
-//  *         schema:
-//  *           type: integer
-//  *     security:
-//  *       - bearerAuth: []
-//  *     responses:
-//  *       200:
-//  *         description: Password reset
-//  */
-
-// /**
-//  * @swagger
-//  * /members/{userId}/status:
-//  *   patch:
-//  *     summary: Update a members's status (active/inactive)
-//  *     tags: [Users]
-//  *     parameters:
-//  *       - name: userId
-//  *         in: path
-//  *         required: true
-//  *         schema:
-//  *           type: integer
-//  *       - name: isActive
-//  *         in: query
-//  *         required: true
-//  *         schema:
-//  *           type: boolean
-//  *     security:
-//  *       - bearerAuth: []
-//  *     responses:
-//  *       200:
-//  *         description: Status updated
-//  */
+module.exports = router;
 
 
-// /**
-//  * @swagger
-//  * /members/import:
-//  *   post:
-//  *     summary: Import users from Excel file
-//  *     tags: [Users]
-//  *     security:
-//  *       - bearerAuth: []
-//  *     requestBody:
-//  *       required: true
-//  *       content:
-//  *         multipart/form-data:
-//  *           schema:
-//  *             type: object
-//  *             properties:
-//  *               file:
-//  *                 type: string
-//  *                 format: binary
-//  *     responses:
-//  *       200:
-//  *         description: Users imported
-//  */
+/**
+ * @swagger
+ * tags:
+ *   name: MemberProfiles
+ *   description: Member profile management APIs
+ */
 
-// /**
-//  * @swagger
-//  * /members/export/to-excel-pdf:
-//  *   get:
-//  *     summary: Export users in Excel or PDF format
-//  *     tags: [Users]
-//  *     parameters:
-//  *       - name: format
-//  *         in: query
-//  *         schema:
-//  *           type: string
-//  *           enum: [excel, pdf]
-//  *     security:
-//  *       - bearerAuth: []
-//  *     responses:
-//  *       200:
-//  *         description: File generated
-//  *         content:
-//  *           application/octet-stream:
-//  *             schema:
-//  *               type: string
-//  *               format: binary
-//  */
 
-// /**
-//  * @swagger
-//  * /members/report/dashboard:
-//  *   get:
-//  *     summary: Get dashboard summary for users
-//  *     tags: [Users]
-//  *     security:
-//  *       - bearerAuth: []
-//  *     responses:
-//  *       200:
-//  *         description: Dashboard data
-//  */
+/**
+ * @swagger
+ * /memberProfile:
+ *   post:
+ *     summary: Create member profile
+ *     tags: [MemberProfiles]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           example:
+ *             userId: 1
+ *             membershipNumber: CPCT-000001
+ *             gender: MALE
+ *             dateOfBirth: 1998-01-01
+ *             maritalStatus: SINGLE
+ *             regionId: 1
+ *             zoneId: 1
+ *             woredaId: 1
+ *             tabiyaId: 1
+ *             educationLevelId: 1
+ *             professionId: 1
+ *             employmentStatus: EMPLOYED
+ *             monthlyIncome: 5000
+ *     responses:
+ *       201:
+ *         description: Member profile created successfully
+ */
 
+
+/**
+ * @swagger
+ * /memberProfile:
+ *   get:
+ *     summary: Get all member profiles
+ *     tags: [MemberProfiles]
+ *     parameters:
+ *       - in: query
+ *         name: regionId
+ *         schema:
+ *           type: integer
+ *         description: Filter by region
+ *       - in: query
+ *         name: zoneId
+ *         schema:
+ *           type: integer
+ *         description: Filter by zone
+ *       - in: query
+ *         name: woredaId
+ *         schema:
+ *           type: integer
+ *         description: Filter by woreda
+ *       - in: query
+ *         name: tabiyaId
+ *         schema:
+ *           type: integer
+ *         description: Filter by tabiya
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search member
+ *     responses:
+ *       200:
+ *         description: Members fetched successfully
+ */
+
+
+/**
+ * @swagger
+ * /memberProfile/{memberId}:
+ *   get:
+ *     summary: Get member profile by ID
+ *     tags: [MemberProfiles]
+ *     parameters:
+ *       - in: path
+ *         name: memberId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Member fetched successfully
+ */
+
+
+/**
+ * @swagger
+ * /memberProfile/{memberId}:
+ *   patch:
+ *     summary: Update member profile
+ *     tags: [MemberProfiles]
+ *     parameters:
+ *       - in: path
+ *         name: memberId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           example:
+ *             professionId: 2
+ *             employmentStatus: SELF_EMPLOYED
+ *             monthlyIncome: 8000
+ *             bio: Updated profile
+ *     responses:
+ *       200:
+ *         description: Member updated successfully
+ */
+
+
+/**
+ * @swagger
+ * /memberProfile/status/{memberId}:
+ *   patch:
+ *     summary: Activate or deactivate member
+ *     tags: [MemberProfiles]
+ *     parameters:
+ *       - in: path
+ *         name: memberId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Member status updated successfully
+ */
+
+
+/**
+ * @swagger
+ * /memberProfile/{memberId}:
+ *   delete:
+ *     summary: Delete member profile
+ *     tags: [MemberProfiles]
+ *     parameters:
+ *       - in: path
+ *         name: memberId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Member deleted successfully
+ */
+
+
+/**
+ * @swagger
+ * /memberProfile/summary:
+ *   get:
+ *     summary: Get member summary statistics
+ *     tags: [MemberProfiles]
+ *     responses:
+ *       200:
+ *         description: Member statistics fetched successfully
+ */
