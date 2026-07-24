@@ -6,29 +6,40 @@ const { authenticationJwt } = require('../../utils/authUtils');
 
 // router.use(authenticationJwt);
 
+
 // Create member profile
 router.post('/', memberController.createMemberProfile);
 
-// Get all members with filters
+
+// Get all members
 router.get('/', memberController.getMembers);
 
-// Get member summary
+
+// Summary
 router.get('/summary', memberController.getMemberSummary);
 
-// Get single member
-router.get('/:memberId', memberController.getMemberProfile);
 
-// Update member profile
-router.patch('/:memberId', memberController.updateMemberProfile);
+// Verify member
+router.patch('/verify/:memberId', memberController.verifyMemberProfile);
+
 
 // Activate/deactivate member
 router.patch('/status/:memberId', memberController.updateMemberStatus);
 
+
+// Get single member
+router.get('/:memberId', memberController.getMemberProfile);
+
+
+// Update member profile
+router.patch('/:memberId', memberController.updateMemberProfile);
+
+
 // Delete member
 router.delete('/:memberId', memberController.deleteMemberProfile);
 
-module.exports = router;
 
+module.exports = router;
 
 /**
  * @swagger
@@ -196,4 +207,22 @@ module.exports = router;
  *     responses:
  *       200:
  *         description: Member statistics fetched successfully
+ */
+/**
+ * @swagger
+ * /memberProfile/verify/{memberId}:
+ *   patch:
+ *     summary: Verify member profile
+ *     tags: [MemberProfiles]
+ *     parameters:
+ *       - in: path
+ *         name: memberId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Member verified successfully
  */

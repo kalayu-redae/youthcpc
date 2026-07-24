@@ -8,6 +8,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       User.belongsTo(models.Role, { foreignKey: 'roleId', as: 'role' });
       User.hasOne(models.MemberProfile, { foreignKey: 'userId', as: 'memberProfile' });
+      User.hasMany(models.News, { foreignKey: 'authorId', as: 'news' });
     }
 
     createPasswordResetOTP() {
