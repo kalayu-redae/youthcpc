@@ -1,6 +1,6 @@
 'use strict';
 
-const { Tabiya, Woreda } = require('../../models');
+const { Tabiya, Woreda, Zone, Region } = require('../../models');
 const { Op } = require('sequelize');
 
 const catchAsync = require('../../utils/catchAsync');

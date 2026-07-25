@@ -7,7 +7,7 @@ const tabiyaController = require('./tabiya.controller');
 const { authenticationJwt } = require('../../utils/authUtils');
 
 
-router.use(authenticationJwt);
+// router.use(authenticationJwt);
 
 
 router.post('/', tabiyaController.createTabiya);

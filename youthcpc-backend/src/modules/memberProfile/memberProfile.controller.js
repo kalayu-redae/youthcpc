@@ -6,36 +6,35 @@ const catchAsync = require('../../utils/catchAsync');
 const AppError = require('../../utils/appError');
 
 
-// CREATE MEMBER PROFILE
-exports.createMemberProfile = catchAsync(async (req, res, next) => {
+// // CREATE MEMBER PROFILE
+// exports.createMemberProfile = catchAsync(async (req, res, next) => {
 
-    const data = req.body;
+//     const data = req.body;
 
-    const exists = await MemberProfile.findOne({
-        where: { userId: data.userId }
-    });
+//     const exists = await MemberProfile.findOne({
+//         where: { userId: data.userId }
+//     });
 
-    if (exists)
-        return next(new AppError("Member profile already exists", 409));
-
-
-    const user = await User.findByPk(data.userId);
-
-    if (!user)
-        return next(new AppError("User not found", 404));
+//     if (exists)
+//         return next(new AppError("Member profile already exists", 409));
 
 
-    const member = await MemberProfile.create(data);
+//     const user = await User.findByPk(data.userId);
+
+//     if (!user)
+//         return next(new AppError("User not found", 404));
 
 
-    res.status(201).json({
-        status: 1,
-        message: "Member profile created successfully",
-        data: member
-    });
+//     const member = await MemberProfile.create(data);
 
-});
 
+//     res.status(201).json({
+//         status: 1,
+//         message: "Member profile created successfully",
+//         data: member
+//     });
+
+// });
 
 
 // GET ALL MEMBERS
@@ -381,7 +380,6 @@ exports.updateMemberStatus = catchAsync(async (req, res, next) => {
 
 
 });
-
 
 
 // DELETE MEMBER

@@ -8,7 +8,7 @@ const { authenticationJwt } = require('../../utils/authUtils');
 
 
 // Create member profile
-router.post('/', memberController.createMemberProfile);
+// router.post('/', memberController.createMemberProfile);
 
 
 // Get all members
@@ -49,34 +49,34 @@ module.exports = router;
  */
 
 
-/**
- * @swagger
- * /memberProfile:
- *   post:
- *     summary: Create member profile
- *     tags: [MemberProfiles]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           example:
- *             userId: 1
- *             membershipNumber: CPCT-000001
- *             gender: MALE
- *             dateOfBirth: 1998-01-01
- *             maritalStatus: SINGLE
- *             regionId: 1
- *             zoneId: 1
- *             woredaId: 1
- *             tabiyaId: 1
- *             educationLevelId: 1
- *             professionId: 1
- *             employmentStatus: EMPLOYED
- *             monthlyIncome: 5000
- *     responses:
- *       201:
- *         description: Member profile created successfully
- */
+// /**
+//  * @swagger
+//  * /memberProfile:
+//  *   post:
+//  *     summary: Create member profile
+//  *     tags: [MemberProfiles]
+//  *     requestBody:
+//  *       required: true
+//  *       content:
+//  *         application/json:
+//  *           example:
+//  *             userId: 1
+//  *             membershipNumber: CPCT-000001
+//  *             gender: MALE
+//  *             dateOfBirth: 1998-01-01
+//  *             maritalStatus: SINGLE
+//  *             regionId: 1
+//  *             zoneId: 1
+//  *             woredaId: 1
+//  *             tabiyaId: 1
+//  *             educationLevelId: 1
+//  *             professionId: 1
+//  *             employmentStatus: EMPLOYED
+//  *             monthlyIncome: 5000
+//  *     responses:
+//  *       201:
+//  *         description: Member profile created successfully
+//  */
 
 
 /**

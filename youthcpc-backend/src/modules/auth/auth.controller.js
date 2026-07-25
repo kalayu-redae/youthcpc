@@ -2,12 +2,13 @@
 
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { User, Role } = require('../../models');
+const { sequelize, User, Role, MemberProfile } = require('../../models');
 const { Op } = require('sequelize');
 const catchAsync = require('../../utils/catchAsync');
 const AppError = require('../../utils/appError');
 const { createMulterMiddleware, processUploadFilesToSave, deleteFile } = require('../../utils/fileUtils');
 const { sendEmail, sendWelcomeEmail } = require('../../utils/emailUtils');
+
 
 require('dotenv').config();
 
@@ -28,49 +29,198 @@ exports.uploadUserAttachments = userUpload.fields([
   { name: 'documents', maxCount: 10 }
 ]);
 
+// exports.signup = catchAsync(async (req, res, next) => {
+//   console.log('req.body:', req.body);
+//   const { fullName, phoneNumber, email, password, roleId } = req.body;
+
+//   if (!fullName || !phoneNumber || !password || !roleId)
+//     return next(new AppError("Full name,phone number,password and role are required", 400));
+
+//   const existingUser = await User.findOne({ where: { phoneNumber } });
+//   console.log('existingUser:', existingUser);
+
+//   if (existingUser)
+//     return next(new AppError("Phone number already exists", 409));
+
+//   let { profileImage } = await processUploadFilesToSave(req, req.files, req.body);
+
+//   if (!profileImage)
+//     profileImage = `${req.protocol}://${req.get('host')}/uploads/default.png`;
+
+//   const role = await Role.findOne({
+//     where: { id: roleId, isActive: true }
+//   });
+
+//   if (!role)
+//     return next(new AppError("Invalid role selected", 400));
+
+//   const user = await User.create({
+//     fullName,
+//     phoneNumber,
+//     email,
+//     password,
+//     roleId,
+//     profileImage
+//   });
+
+//   await sendWelcomeEmail(user, password);
+
+//   res.status(201).json({
+//     status: 1,
+//     message: "User registered successfully",
+//     data: user
+//   });
+// });
+
+
 exports.signup = catchAsync(async (req, res, next) => {
-  console.log('req.body:', req.body);
-  const { fullName, phoneNumber, email, password, roleId } = req.body;
 
-  if (!fullName || !phoneNumber || !password || !roleId)
-    return next(new AppError("Full name,phone number,password and role are required", 400));
+  const transaction = await sequelize.transaction();
 
-  const existingUser = await User.findOne({ where: { phoneNumber } });
-  console.log('existingUser:', existingUser);
+  try {
 
-  if (existingUser)
-    return next(new AppError("Phone number already exists", 409));
+    const {
+      fullName,
+      phoneNumber,
+      email,
+      password,
+      roleId,
 
-  let { profileImage } = await processUploadFilesToSave(req, req.files, req.body);
+      membershipNumber,
+      gender,
+      dateOfBirth,
+      maritalStatus,
+      nationality,
 
-  if (!profileImage)
-    profileImage = `${req.protocol}://${req.get('host')}/uploads/default.png`;
+      regionId,
+      zoneId,
+      woredaId,
+      tabiyaId,
 
-  const role = await Role.findOne({
-    where: { id: roleId, isActive: true }
-  });
+      educationLevelId,
+      professionId,
 
-  if (!role)
-    return next(new AppError("Invalid role selected", 400));
+      occupation,
+      organization,
+      employmentStatus,
+      monthlyIncome,
 
-  const user = await User.create({
-    fullName,
-    phoneNumber,
-    email,
-    password,
-    roleId,
-    profileImage
-  });
+      availabilityStatus,
+      availabilityNote,
 
-  await sendWelcomeEmail(user, password);
+      emergencyContactName,
+      emergencyContactPhone,
 
-  res.status(201).json({
-    status: 1,
-    message: "User registered successfully",
-    data: user
-  });
+      membershipDate,
+
+      experience,
+      certifications,
+      volunteerExperience,
+      aspirations,
+      socialMedia,
+      bio
+
+    } = req.body;
+
+    if (!fullName || !phoneNumber || !password || !roleId)
+      return next(new AppError("Full name, phone number, password and role are required", 400));
+
+    const existingUser = await User.findOne({
+      where: { phoneNumber },
+      transaction
+    });
+
+    if (existingUser)
+      return next(new AppError("Phone number already exists", 409));
+
+    const role = await Role.findOne({
+      where: { id: roleId, isActive: true },
+      transaction
+    });
+
+    if (!role)
+      return next(new AppError("Invalid role selected", 400));
+
+    let { profileImage } = await processUploadFilesToSave(req, req.files, req.body);
+
+    if (!profileImage)
+      profileImage = `${req.protocol}://${req.get('host')}/uploads/default.png`;
+    // console.log('profileImage:', profileImage);
+    console.log('req.body:', req.body);
+    const user = await User.create({
+
+      fullName,
+      phoneNumber,
+      email,
+      password,
+      roleId,
+      profileImage
+
+    }, { transaction });
+
+    const memberProfile = await MemberProfile.create({
+      userId: user.id,
+      membershipNumber,
+      gender,
+      dateOfBirth,
+      maritalStatus,
+      nationality,
+
+      regionId,
+      zoneId,
+      woredaId,
+      tabiyaId,
+
+      educationLevelId,
+      professionId,
+
+      occupation,
+      organization,
+      employmentStatus,
+      monthlyIncome,
+
+      availabilityStatus,
+      availabilityNote,
+
+      emergencyContactName,
+      emergencyContactPhone,
+
+      membershipDate,
+
+      experience,
+      certifications,
+      volunteerExperience,
+      aspirations,
+      socialMedia,
+      bio
+
+    }, { transaction });
+
+    await transaction.commit();
+
+    await sendWelcomeEmail(user, password);
+
+    res.status(201).json({
+
+      status: 1,
+      message: "Member registered successfully",
+
+      data: {
+        user,
+        memberProfile
+      }
+
+    });
+
+  } catch (err) {
+
+    await transaction.rollback();
+
+    return next(err);
+
+  }
+
 });
-
 exports.login = catchAsync(async (req, res, next) => {
   const { phoneNumber, password } = req.body;
 

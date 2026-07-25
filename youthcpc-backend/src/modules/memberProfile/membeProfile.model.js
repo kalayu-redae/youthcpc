@@ -17,8 +17,8 @@ module.exports = (sequelize, DataTypes) => {
             MemberProfile.belongsTo(models.Profession, { foreignKey: 'professionId', as: 'profession' });
 
             MemberProfile.hasMany(models.MemberSkill, { foreignKey: 'memberProfileId', as: 'memberSkills' });
-            MemberProfile.hasMany(models.MemberLanguage, { foreignKey: 'memberProfileId', as: 'memberLanguages' });
-            MemberProfile.hasMany(models.MemberInterest, { foreignKey: 'memberProfileId', as: 'memberInterests' });
+            // MemberProfile.hasMany(models.MemberLanguage, { foreignKey: 'memberProfileId', as: 'memberLanguages' });
+            // MemberProfile.hasMany(models.MemberInterest, { foreignKey: 'memberProfileId', as: 'memberInterests' });
 
         }
 

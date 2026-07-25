@@ -27,11 +27,33 @@ module.exports = router;
  */
 
 
+// /**
+//  * @swagger
+//  * /auth/signup:
+//  *   post:
+//  *     summary: Register new user
+//  *     tags: [Auth]
+//  *     requestBody:
+//  *       required: true
+//  *       content:
+//  *         application/json:
+//  *           example:
+//  *             fullName: "Kalayu Redae"
+//  *             phoneNumber: "0943662611"
+//  *             email: "kalayuredae2016@gmail.com"
+//  *             password: "Member@123"
+//  *             roleId: 4
+//  *             address: "Mekelle"
+//  *     responses:
+//  *       201:
+//  *         description: User registered successfully
+//  */
+
 /**
  * @swagger
  * /auth/signup:
  *   post:
- *     summary: Register new user
+ *     summary: Register a new member
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -43,12 +65,43 @@ module.exports = router;
  *             email: "kalayuredae2016@gmail.com"
  *             password: "Member@123"
  *             roleId: 4
- *             address: "Mekelle"
- *     responses:
- *       201:
- *         description: User registered successfully
+ *             membershipNumber: "CPCT-000001"
+ *             gender: "MALE"
+ *             dateOfBirth: "1998-01-01"
+ *             maritalStatus: "SINGLE"
+ *             nationality: "Ethiopian"
+ *             regionId: 1
+ *             zoneId: 2
+ *             woredaId: 3
+ *             tabiyaId: 5
+ *             educationLevelId: 4
+ *             professionId: 8
+ *             occupation: "Software Developer"
+ *             organization: "CPCT Youth Wing"
+ *             employmentStatus: "EMPLOYED"
+ *             monthlyIncome: 5000
+ *             availabilityStatus: "AVAILABLE"
+ *             availabilityNote: "Available on weekends"
+ *             emergencyContactName: "Redae Gebreab"
+ *             emergencyContactPhone: "0911223344"
+ *             membershipDate: "2026-07-25"
+ *             experience: "5 years of software development."
+ *             certifications: "AWS Certified Cloud Practitioner"
+ *             volunteerExperience: "Youth mentor and community volunteer."
+ *             aspirations: "Become a technology leader."
+ *             socialMedia:
+ *               facebook: "https://facebook.com/kalayu"
+ *               telegram: "@kalayu"
+ *               linkedin: "https://linkedin.com/in/kalayu"
+ *             bio: "Active youth member interested in technology and leadership."
+ *   responses:
+ *     201:
+ *       description: Member registered successfully
+ *     400:
+ *       description: Validation error
+ *     409:
+ *       description: Phone number or membership number already exists
  */
-
 
 /**
  * @swagger

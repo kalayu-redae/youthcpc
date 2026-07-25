@@ -34,7 +34,19 @@ module.exports = (sequelize, DataTypes) => {
     roleId: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
     fullName: { type: DataTypes.STRING(150), allowNull: false },
     phoneNumber: { type: DataTypes.STRING(20), allowNull: false, unique: true },
-    email: { type: DataTypes.STRING(120), unique: true, validate: { isEmail: true } },
+    email: {
+      type: DataTypes.STRING(120),
+      allowNull: true,
+      unique: true,
+      validate: {
+        isEmail(value) {
+          if (value && value.trim() !== '') {
+            if (!/^\S+@\S+\.\S+$/.test(value))
+              throw new Error('Invalid email format');
+          }
+        }
+      }
+    },
     password: { type: DataTypes.STRING, allowNull: false },
 
     profileImage: { type: DataTypes.STRING },
