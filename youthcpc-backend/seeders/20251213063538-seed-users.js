@@ -18,7 +18,7 @@ module.exports = {
       {
         roleId: getRole('SUPER_ADMIN'),
         fullName: 'Super Administrator',
-        phoneNumber: '0911000000',
+        phoneNumber: '0943662613',
         email: 'superadmin@youthcpc.org',
         password: await bcrypt.hash('SuperAdmin@123', 12),
         profileImage: null,
@@ -34,7 +34,7 @@ module.exports = {
       {
         roleId: getRole('ADMIN'),
         fullName: 'System Administrator',
-        phoneNumber: '0911000001',
+        phoneNumber: '0943662610',
         email: 'admin@youthcpc.org',
         password: await bcrypt.hash('Admin@123', 12),
         profileImage: null,
@@ -50,7 +50,7 @@ module.exports = {
       {
         roleId: getRole('COORDINATOR'),
         fullName: 'Youth Coordinator',
-        phoneNumber: '0911000002',
+        phoneNumber: '0943662612',
         email: 'coordinator@youthcpc.org',
         password: await bcrypt.hash('Coordinator@123', 12),
         profileImage: null,
@@ -66,7 +66,7 @@ module.exports = {
       {
         roleId: getRole('MEMBER'),
         fullName: 'Youth Member',
-        phoneNumber: '0911000003',
+        phoneNumber: '0943662611',
         email: 'kalayuredae2016@gmail.com',
         password: await bcrypt.hash('Member@123', 12),
         profileImage: null,
@@ -84,7 +84,7 @@ module.exports = {
 
   async down(queryInterface) {
     await queryInterface.bulkDelete('Users', {
-      phoneNumber: ['0911000000', '0911000001', '0911000002']
+      phoneNumber: ['0943662611', '0943662612', '0943662613']
     });
   }
 };

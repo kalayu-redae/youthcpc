@@ -115,7 +115,7 @@ module.exports = router;
  *         application/json:
  *           example:
  *             phoneNumber: "0943662611"
- *             password: "Password@123"
+ *             password: "Member@123"
  *     responses:
  *       200:
  *         description: Login successful
