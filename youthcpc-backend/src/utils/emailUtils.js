@@ -9,7 +9,7 @@ exports.sendEmail = catchAsync(async (options) => {
     port: 587,
     secure: false, //// Use `true` for port 465, `false` for all other port
     auth: {
-      user:process.env. EMAIL_USERNAME,
+      user: process.env.EMAIL_USERNAME,
       pass: process.env.EMAIL_PASSWORD
     },
     tls: {
@@ -33,79 +33,108 @@ exports.sendEmail = catchAsync(async (options) => {
     }
   });
   return transporter.sendMail(mailOptions)
-   
+
 });
 
 exports.sendWelcomeEmail = async (user, password) => {
-  const subject = 'Welcome to Smart Hospital Management System 🎉';
+
+  const subject = 'Welcome to the Youth CPCT Platform 🎉';
 
   const email = user.email;
 
-  const loginLink =
-    process.env.NODE_ENV === 'development'
-      ? 'http://localhost:8085'
-      : 'https://hms.sophortechnologies.com';
+  const loginLink = process.env.NODE_ENV === 'development'
+    ? 'http://localhost:8085'
+    : 'https://youthcpct.kalayuredae.com';
 
   const message = `
 Hi ${user.fullName},
 
-Welcome to the Smart Hospital Management System!
+Welcome to the Youth CPCT Platform!
 
-Your account has been successfully created. Below are your login details:
+Your account has been created successfully.
 
-----------------------------------------
-Full Name : ${user.fullName}
-Email     : ${email}
-PhoneNumber  : ${user.phoneNumber}
-Password  : ${password}
-----------------------------------------
+==================================================
+LOGIN INFORMATION
+==================================================
 
-🔐 For security reasons, we strongly recommend changing your password immediately after your first login.
+Full Name   : ${user.fullName}
+Email       : ${user.email || 'N/A'}
+Phone Number: ${user.phoneNumber}
+Password    : ${password}
 
-You can access your account here:
+==================================================
+
+For your security, please change your password after your first login.
+
+Login here:
 ${loginLink}
 
-With our system, you can manage inventory efficiently and securely.
+With your account you can:
 
-If you need any assistance, our support team is always ready to help.
+• Complete and update your member profile.
+• Access youth services and announcements.
+• Register for programs and activities.
+• Receive important notifications.
+• Manage your personal information securely.
 
-We’re excited to have you on board!
+If you experience any problems logging in, please contact the system administrator.
 
-Best regards,
-Smart Hospital Management System Team
+Thank you for being part of the Youth CPCT community.
+
+Best Regards,
+
+Youth CPCT Platform Team
 ${loginLink}
 `;
 
   await exports.sendEmail({ email, subject, message });
+
 };
 
-exports.emailBusinessDetail = async (user, role,password) => {
-  const subject='Welcome to Smart Inventory Managment System!'
+exports.emailBusinessDetail = async (user, role, password) => {
+
+  const subject = 'Your Youth CPCT Platform Account';
+
   const email = user.email;
-  const loginLink = process.env.NODE_ENV === 'development' 
-    ? 'https://hms.sophortechnologies.com or http://localhost:8085'
-    : 'https://hms.sophortechnologies.com';
 
-  const message = `Hi ${user.fullName},
-  
-  Welcome to Our Platform! We're excited to have you on board.
-  
-  Here are your account details:
-  - FullName: ${user.fullName}
-  -role: ${role}
-  - Email: ${email}
-  -phoneNumber: ${user.phoneNumber}
-  - address: ${user.address}
-  - Password: ${password}
-  -Login here: ${loginLink}
-  
-  Please visit our platform to explore our Inventory Services.
-  If you have any questions or need assistance, feel free to contact our support team.
-  
-  Best regards,
-  Sophor Inventory managment Sysetem Group Team`;
+  const loginLink = process.env.NODE_ENV === 'development'
+    ? 'http://localhost:8085'
+    : 'https://youthcpct.kalayuredae.com';
 
-  // console.log("subb",subject,email,message)
+  const message = `
+Hi ${user.fullName},
+
+Welcome to the Youth CPCT Platform.
+
+An account has been created for you.
+
+==================================================
+ACCOUNT DETAILS
+==================================================
+
+Full Name   : ${user.fullName}
+Role        : ${role}
+Email       : ${user.email || 'N/A'}
+Phone Number: ${user.phoneNumber}
+Password    : ${password}
+
+==================================================
+
+Login:
+${loginLink}
+
+Please log in and change your password immediately after your first sign in.
+
+You can then complete your member profile and access all platform services.
+
+If you need assistance, please contact the system administrator.
+
+Best Regards,
+
+Youth CPCT Platform Team
+${loginLink}
+`;
+
   await exports.sendEmail({ email, subject, message });
 
 };
