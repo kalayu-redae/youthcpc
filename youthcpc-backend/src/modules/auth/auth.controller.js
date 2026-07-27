@@ -72,7 +72,6 @@ exports.uploadUserAttachments = userUpload.fields([
 //   });
 // });
 
-
 exports.signup = catchAsync(async (req, res, next) => {
 
   const transaction = await sequelize.transaction();
@@ -85,40 +84,31 @@ exports.signup = catchAsync(async (req, res, next) => {
       email,
       password,
       roleId,
-
       gender,
       dateOfBirth,
       maritalStatus,
       nationality,
-
       regionId,
       zoneId,
       woredaId,
       tabiyaId,
-
       educationLevelId,
       professionId,
-
       occupation,
       organization,
       employmentStatus,
       monthlyIncome,
-
       availabilityStatus,
       availabilityNote,
-
       emergencyContactName,
       emergencyContactPhone,
-
       membershipDate,
-
       experience,
       certifications,
       volunteerExperience,
       aspirations,
       socialMedia,
       bio
-
     } = req.body;
 
     if (!fullName || !phoneNumber || !password || !roleId) {
@@ -162,7 +152,6 @@ exports.signup = catchAsync(async (req, res, next) => {
 
     const memberProfile = await MemberProfile.create({
       userId: user.id,
-      membershipNumber: 'TEMP',
       gender,
       dateOfBirth,
       maritalStatus,
@@ -190,9 +179,9 @@ exports.signup = catchAsync(async (req, res, next) => {
       bio
     }, { transaction });
 
-    memberProfile.membershipNumber = `CPCT-${String(memberProfile.id).padStart(6, '0')}`;
-
-    await memberProfile.save({ transaction });
+    await memberProfile.update({
+      membershipNumber: `CPCT-${String(memberProfile.id).padStart(6, '0')}`
+    }, { transaction });
 
     await transaction.commit();
 
@@ -216,7 +205,6 @@ exports.signup = catchAsync(async (req, res, next) => {
   }
 
 });
-
 exports.login = catchAsync(async (req, res, next) => {
   const { phoneNumber, password } = req.body;
 
