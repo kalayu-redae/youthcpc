@@ -9,7 +9,11 @@ const AppError = require('../../utils/appError');
 const { createMulterMiddleware, processUploadFilesToSave, deleteFile } = require('../../utils/fileUtils');
 const { sendEmail, sendWelcomeEmail } = require('../../utils/emailUtils');
 
-
+console.log({
+  User,
+  Role,
+  MemberProfile
+});
 require('dotenv').config();
 
 const signInToken = (user) => {
