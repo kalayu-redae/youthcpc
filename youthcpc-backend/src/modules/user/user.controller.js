@@ -10,7 +10,7 @@ const { processUploadFilesToSave } = require('../../utils/fileUtils');
 exports.getAllUsers = catchAsync(async (req, res, next) => {
   const { search, isActive, roleId, page = 1, limit = 20 } = req.query;
 
-  const where = {};
+  const where = { roleId: { [Op.ne]: 4 } };
 
   if (roleId) where.roleId = roleId;
 
