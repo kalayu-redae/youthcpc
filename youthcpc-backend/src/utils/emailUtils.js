@@ -43,7 +43,7 @@ exports.sendWelcomeEmail = async (user, password) => {
   const email = user.email;
 
   const loginLink = process.env.NODE_ENV === 'development'
-    ? 'http://localhost:8085'
+    ? 'http://localhost:8086'
     : 'https://youthcpct.kalayuredae.com';
 
   const message = `
@@ -53,16 +53,12 @@ Welcome to the Youth CPCT Platform!
 
 Your account has been created successfully.
 
-==================================================
-LOGIN INFORMATION
-==================================================
-
+LOGIN INFORMATION:
 Full Name   : ${user.fullName}
 Email       : ${user.email || 'N/A'}
 Phone Number: ${user.phoneNumber}
 Password    : ${password}
 
-==================================================
 
 For your security, please change your password after your first login.
 
@@ -98,7 +94,7 @@ exports.emailBusinessDetail = async (user, role, password) => {
   const email = user.email;
 
   const loginLink = process.env.NODE_ENV === 'development'
-    ? 'http://localhost:8085'
+    ? 'http://localhost:8086'
     : 'https://youthcpct.kalayuredae.com';
 
   const message = `
@@ -136,5 +132,38 @@ ${loginLink}
 `;
 
   await exports.sendEmail({ email, subject, message });
+
+};
+
+exports.sendContactReplyEmail = async (contact) => {
+
+  const subject = `Re: ${contact.subject}`;
+
+  const message = `
+Hi ${contact.fullName},
+
+Thank you for contacting the Youth CPCT Platform.
+
+Below is our response to your inquiry.
+
+----------------------------------------------------
+
+${contact.reply}
+
+----------------------------------------------------
+
+If you have additional questions, simply reply to this email or submit another inquiry through our website.
+
+Best Regards,
+
+Youth CPCT Platform Team
+https://youthcpct.kalayuredae.com
+`;
+
+  await exports.sendEmail({
+    email: contact.email,
+    subject,
+    message
+  });
 
 };

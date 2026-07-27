@@ -86,7 +86,6 @@ exports.signup = catchAsync(async (req, res, next) => {
       password,
       roleId,
 
-      membershipNumber,
       gender,
       dateOfBirth,
       maritalStatus,
@@ -122,94 +121,90 @@ exports.signup = catchAsync(async (req, res, next) => {
 
     } = req.body;
 
-    if (!fullName || !phoneNumber || !password || !roleId)
+    if (!fullName || !phoneNumber || !password || !roleId) {
+      await transaction.rollback();
       return next(new AppError("Full name, phone number, password and role are required", 400));
+    }
 
     const existingUser = await User.findOne({
       where: { phoneNumber },
       transaction
     });
 
-    if (existingUser)
+    if (existingUser) {
+      await transaction.rollback();
       return next(new AppError("Phone number already exists", 409));
+    }
 
     const role = await Role.findOne({
       where: { id: roleId, isActive: true },
       transaction
     });
 
-    if (!role)
+    if (!role) {
+      await transaction.rollback();
       return next(new AppError("Invalid role selected", 400));
+    }
 
     let { profileImage } = await processUploadFilesToSave(req, req.files, req.body);
 
     if (!profileImage)
       profileImage = `${req.protocol}://${req.get('host')}/uploads/default.png`;
-    // console.log('profileImage:', profileImage);
-    console.log('req.body:', req.body);
-    const user = await User.create({
 
+    const user = await User.create({
       fullName,
       phoneNumber,
       email,
       password,
       roleId,
       profileImage
-
     }, { transaction });
 
     const memberProfile = await MemberProfile.create({
       userId: user.id,
-      membershipNumber,
+      membershipNumber: 'TEMP',
       gender,
       dateOfBirth,
       maritalStatus,
       nationality,
-
       regionId,
       zoneId,
       woredaId,
       tabiyaId,
-
       educationLevelId,
       professionId,
-
       occupation,
       organization,
       employmentStatus,
       monthlyIncome,
-
       availabilityStatus,
       availabilityNote,
-
       emergencyContactName,
       emergencyContactPhone,
-
       membershipDate,
-
       experience,
       certifications,
       volunteerExperience,
       aspirations,
       socialMedia,
       bio
-
     }, { transaction });
+
+    memberProfile.membershipNumber = `CPCT-${String(memberProfile.id).padStart(6, '0')}`;
+
+    await memberProfile.save({ transaction });
 
     await transaction.commit();
 
     await sendWelcomeEmail(user, password);
 
     res.status(201).json({
-
       status: 1,
       message: "Member registered successfully",
-
       data: {
         user,
         memberProfile
       }
-
     });
 
   } catch (err) {
@@ -221,6 +216,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   }
 
 });
+
 exports.login = catchAsync(async (req, res, next) => {
   const { phoneNumber, password } = req.body;
 

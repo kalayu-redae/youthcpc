@@ -285,7 +285,6 @@ exports.deleteContactMessage = catchAsync(async (req, res, next) => {
 });
 
 
-
 // CONTACT MESSAGE SUMMARY
 exports.getContactSummary = catchAsync(async (req, res, next) => {
 
@@ -335,5 +334,33 @@ exports.getContactSummary = catchAsync(async (req, res, next) => {
 
     });
 
+
+});
+
+exports.replyMessage = catchAsync(async (req, res, next) => {
+
+    const { reply } = req.body;
+
+
+    if (!reply) return next(new AppError('Reply is required', 400));
+
+    const contact = await ContactMessage.findByPk(req.params.messageId);
+
+    if (!contact) return next(new AppError('Contact message not found', 404));
+
+    contact.reply = reply;
+    contact.status = 'REPLIED';
+    contact.repliedBy = req.user.id;
+    contact.repliedAt = new Date();
+
+    await contact.save();
+
+    await sendContactReplyEmail(contact);
+
+    res.status(200).json({
+        status: 1,
+        message: 'Reply sent successfully',
+        data: contact
+    });
 
 });

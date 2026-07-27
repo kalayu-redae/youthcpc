@@ -8,98 +8,43 @@ module.exports = (sequelize, DataTypes) => {
 
         static associate(models) {
 
-            ContactMessage.belongsTo(models.User, {
-                foreignKey: 'repliedBy',
-                as: 'replyUser'
-            });
+            ContactMessage.belongsTo(models.User, { foreignKey: 'repliedBy', as: 'replyUser' });
 
         }
 
     }
 
-
     ContactMessage.init({
 
-        id: {
-            type: DataTypes.INTEGER.UNSIGNED,
-            autoIncrement: true,
-            primaryKey: true
-        },
+        id: { type: DataTypes.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true },
 
+        fullName: { type: DataTypes.STRING(150), allowNull: false },
 
-        fullName: {
-            type: DataTypes.STRING(150),
-            allowNull: false
-        },
+        email: { type: DataTypes.STRING(150), allowNull: false, validate: { isEmail: true } },
 
+        phone: { type: DataTypes.STRING(30) },
 
-        email: {
-            type: DataTypes.STRING(150),
-            allowNull: false
-        },
+        subject: { type: DataTypes.STRING(200), allowNull: false },
 
+        message: { type: DataTypes.TEXT, allowNull: false },
 
-        phone: {
-            type: DataTypes.STRING(30)
-        },
+        status: { type: DataTypes.ENUM('NEW', 'READ', 'REPLIED', 'CLOSED'), allowNull: false, defaultValue: 'NEW' },
 
+        reply: { type: DataTypes.TEXT },
 
-        subject: {
-            type: DataTypes.STRING(200),
-            allowNull: false
-        },
+        repliedBy: { type: DataTypes.INTEGER.UNSIGNED },
 
+        repliedAt: { type: DataTypes.DATE },
 
-        message: {
-            type: DataTypes.TEXT,
-            allowNull: false
-        },
-
-
-        status: {
-            type: DataTypes.ENUM(
-                'NEW',
-                'READ',
-                'REPLIED',
-                'CLOSED'
-            ),
-            defaultValue: 'NEW'
-        },
-
-
-        reply: {
-            type: DataTypes.TEXT
-        },
-
-
-        repliedBy: {
-            type: DataTypes.INTEGER.UNSIGNED
-        },
-
-
-        repliedAt: {
-            type: DataTypes.DATE
-        },
-
-
-        isActive: {
-            type: DataTypes.BOOLEAN,
-            defaultValue: true
-        }
-
+        isActive: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
+        adminNote: { type: DataTypes.TEXT }
 
     }, {
-
         sequelize,
-
         modelName: 'ContactMessage',
-
         tableName: 'ContactMessages',
-
         timestamps: true
-
     });
-
 
     return ContactMessage;
 

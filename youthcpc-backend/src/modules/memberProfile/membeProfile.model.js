@@ -28,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
 
         id: { type: DataTypes.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true },
         userId: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false, unique: true },
-        membershipNumber: { type: DataTypes.STRING(50), allowNull: false, unique: true },
+        membershipNumber: { type: DataTypes.STRING(50), allowNull: fals, unique: true },
 
         gender: { type: DataTypes.ENUM('MALE', 'FEMALE') },
         dateOfBirth: { type: DataTypes.DATEONLY },
